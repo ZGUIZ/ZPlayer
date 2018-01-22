@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:orientation="vertical"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentBottom="true"
+    android:id="@+id/con_bar">
+    <ProgressBar
+        android:id="@+id/progressbar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp" />
+    <RelativeLayout
+        android:id="@+id/singleSong_layout"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="2dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:paddingTop="1dp"
+            android:id="@+id/music_album"
+            android:src="@drawable/defaluticon"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+        <RelativeLayout
+            android:id="@+id/music_about_layout"
+            android:layout_alignTop="@id/music_album"
+            android:layout_toRightOf="@id/music_album"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageButton
+                android:src="@drawable/play"
+                android:padding="10dp"
+                android:id="@+id/startpause"
+                android:layout_alignParentRight="true"
+                android:scaleType="fitXY"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <ImageButton
+                android:id="@+id/love_ib"
+                android:src="@drawable/love"
+                android:padding="10dp"
+                android:layout_toLeftOf="@id/startpause"
+                android:scaleType="fitXY"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <TextView
+                android:id="@+id/music_title"
+                android:layout_alignParentLeft="true"
+                android:textSize="15dp"
+                android:layout_toLeftOf="@id/love_ib"
+                android:layout_marginTop="1dp"
+                android:layout_marginLeft="5.0dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/music_artist"
+                android:layout_below="@id/music_title"
+                android:layout_toLeftOf="@id/love_ib"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="5.0dp"
+                android:layout_marginTop="5.0dp"
+                android:layout_marginBottom="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.amia.zplayer.Activity.PlayingActivity">
+
+    <RelativeLayout
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/play_bottom_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v4.view.ViewPager
+            android:id="@+id/music_info_pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></android.support.v4.view.ViewPager>
+        <ImageButton
+            android:id="@+id/play_back_ib"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/back"
+            android:scaleType="fitXY"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_width="15dp"
+            android:layout_height="26dp" />
+    </RelativeLayout>
+
+    <include layout="@layout/playing_bottom_control"/>
+
+    <LinearLayout
+        android:id="@+id/play_bottom_ll"
+        android:orientation="vertical"
+        android:layout_above="@+id/play_bottom_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/currentPos"
+                android:paddingLeft="6dp"
+                android:layout_alignParentLeft="true"
+                android:text="00:00"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <SeekBar
+                android:id="@+id/music_seekbar"
+                android:layout_centerInParent="true"
+                android:layout_marginLeft="35dp"
+                android:layout_marginRight="35dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/Duration_tv"
+                android:paddingRight="6dp"
+                android:layout_alignParentRight="true"
+                android:text="00:00"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/play_pause_ib"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:src="@drawable/play_btton"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_centerInParent="true"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <ImageButton
+                android:id="@+id/pre_ib"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="30dp"
+                android:padding="3dp"
+                android:src="@drawable/pre"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_toLeftOf="@id/play_pause_ib"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <ImageButton
+                android:id="@+id/next_ib"
+                android:padding="3dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="30dp"
+                android:src="@drawable/next"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_toRightOf="@id/play_pause_ib"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <include layout="@layout/half_musiclist_layout" />
+
+</RelativeLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:id="@+id/tit_bar">
+
+    <Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/web_Button"
+                    android:textAlignment="center"
+                    android:text="乐库"
+                    android:textSize="16dp"
+                    android:layout_width="80dp"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_height="wrap_content" />
+                <View
+                    android:id="@+id/web_view"
+                    android:layout_below="@+id/web_Button"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="6dp"
+                    android:layout_width="50dp"
+                    android:layout_height="1dp"
+                    android:background="@android:color/holo_red_light"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/list_button"
+                    android:textAlignment="center"
+                    android:text="列表"
+                    android:textSize="16dp"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content" />
+                <View
+                    android:id="@+id/list_view"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/list_button"
+                    android:layout_marginTop="6dp"
+                    android:layout_width="50dp"
+                    android:layout_height="1dp"
+                    android:background="@android:color/holo_red_light"
+                    android:visibility="gone" />
+            </RelativeLayout>
+        </LinearLayout>
+    </Toolbar>
+
+</LinearLayout>
