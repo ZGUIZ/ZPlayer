@@ -202,6 +202,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 play(i);
+                resetLrc(musList.get(i));  //重置歌词
             }
         });
     }
