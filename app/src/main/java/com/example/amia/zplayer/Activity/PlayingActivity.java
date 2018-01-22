@@ -89,7 +89,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     private List<LrcEntity> lrcList;   //歌词列表
     private List<Map<String,Object>> lrcObject=new ArrayList<>();   //歌词适配SimpleAdapter转换的List
     private int curlrc;     //当前歌词所在位置
-    private boolean isDrag;  //是否被拖动
+    //private boolean isDrag;  //是否被拖动
 
     private static WindowInfoMananger wim;
     private static Point point;
@@ -331,32 +331,18 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             lrc_listView.setDivider(null);
             null_lrc_tv = findViewById(R.id.nul_lrc);
 
-            lrc_listView.setOnDragListener(new View.OnDragListener() {
-                @Override
-                public boolean onDrag(View view, DragEvent dragEvent) {
-                    switch (dragEvent.getAction()){
-                        case DragEvent.ACTION_DRAG_STARTED:
-                            isDrag=true;
-                            break;
-                        case DragEvent.ACTION_DRAG_ENDED:
-                            isDrag=false;
-                            break;
-                    }
-                    return false;
-                }
-            });
+            //当发生触摸事件时，3秒内不滚动到现在对应的歌词上
             lrc_listView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     switch (motionEvent.getAction()){
                         case MotionEvent.ACTION_DOWN:
-                            isDrag=true;
+                            DragCancelRunnable.setDrag(true);
                             break;
                         case MotionEvent.ACTION_UP:
-                            isDrag=false;
+                            new Thread(new DragCancelRunnable()).start();
                             break;
                     }
-                    //Log.i("onTouch","isDrag="+isDrag);
                     return false;
                 }
             });
@@ -381,11 +367,11 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     //设置歌词
     private void setLrc(int position){
         curlrc=PlayingActivityUtil.getCurlrcSet(curlrc,lrcList,position);
-        //Log.i("setLrc","curset="+curlrc);
-        //lrc_listView.smoothScrollByOffset(curlrc);
         lrcAdapter.notifyDataSetChanged();
-        //Log.i("setLrc","isDrag="+isDrag);
-        if(isDrag){
+
+        //判断3秒内是否触摸过屏幕
+        //如果触摸过，则不跳转对应的歌词上
+        if(DragCancelRunnable.isDrag()){
             return;
         }
         if(curlrc-5>0){
@@ -610,5 +596,34 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 holder.textView.setTextSize(16f);
             }
         }
+    }
+}
+
+/**
+ * 控制滚动歌词列表的时候不自动跳转到对应的歌词选项的线程
+ */
+class DragCancelRunnable implements Runnable{
+    private static int count;
+    private static boolean isDrag;
+    @Override
+    public void run() {
+        try {
+            count++;
+            isDrag=true;
+            Thread.sleep(3000);
+            count--;
+            if(count==0){
+                isDrag=false;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean isDrag() {
+        return isDrag;
+    }
+    public static void setDrag(boolean Drag){
+        isDrag=Drag;
     }
 }
