@@ -117,6 +117,7 @@ public class PlayingActivityUtil {
         }
         null_lrc.setVisibility(View.INVISIBLE);
         lrc_list_view.setVisibility(View.VISIBLE);
+        lrcObject.clear();
         for(int i=0;i<lrc.size();i++){
             HashMap<String,Object> temp=new HashMap<>();
             temp.put("lrc",lrc.get(i).getLrc());
