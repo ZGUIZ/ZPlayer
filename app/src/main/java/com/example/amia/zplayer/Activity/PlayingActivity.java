@@ -389,13 +389,13 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     }
 
     private void resetLrc(Mp3Info mp3Info){
-        curlrc=0;
         lrcList=LrcResovler.getLrc(mp3Info.getTitle(),mp3Info.getArtist());
         if(lrcList==null||lrcList.size()==0){
             PlayingActivityUtil.setEmptyLrc(lrcObject,null_lrc_tv,lrc_listView);
             return;
         }
         PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView);
+        curlrc=PlayingActivityUtil.firstfindCurrentLrc(lrcList,musicPlayManager.getCurrentPosition(),currentMp3Info);
         lrcAdapter.notifyDataSetChanged();
     }
 
