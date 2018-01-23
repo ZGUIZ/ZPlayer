@@ -6,76 +6,80 @@
     android:paddingRight="23dp"
     android:layout_alignParentBottom="true"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="42dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_weight="1">
         <ImageButton
             android:id="@+id/music_list_ib"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:layout_marginRight="20dp"
             android:layout_centerInParent="true"
             android:padding="3dp"
             android:src="@drawable/list"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="fitCenter"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_weight="1">
         <ImageButton
             android:id="@+id/play_mode_ib"
             android:layout_centerInParent="true"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:layout_marginRight="20dp"
             android:padding="3dp"
             android:src="@drawable/listloop"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:scaleType="fitXY"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
+            android:scaleType="fitCenter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_weight="1">
         <ImageButton
             android:id="@+id/play_love_ib"
             android:layout_centerInParent="true"
             android:padding="3dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:layout_marginRight="20dp"
             android:src="@drawable/love"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:scaleType="fitXY"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
+            android:scaleType="fitCenter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_weight="1">
         <ImageButton
             android:id="@+id/play_else"
             android:layout_centerInParent="true"
             android:padding="3dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginRight="6dp"
             android:src="@drawable/play_else"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="fitCenter"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
 
