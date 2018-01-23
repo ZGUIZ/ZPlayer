@@ -367,8 +367,13 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
 
     //设置歌词
     private void setLrc(int position){
+        int temp=curlrc;
         curlrc=PlayingActivityUtil.getCurlrcSet(curlrc,lrcList,position);
-        lrcAdapter.notifyDataSetChanged();
+
+        //如果歌词没变动则不需要改变
+        if(temp!=curlrc) {
+            lrcAdapter.notifyDataSetChanged();
+        }
 
         //判断3秒内是否触摸过屏幕
         //如果触摸过，则不跳转对应的歌词上
@@ -591,10 +596,12 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         public void setLrcColor(LrcAdapter.Holder holder,int position) {
             if (position == curlrc) {
                 holder.textView.setTextColor(Color.rgb(105, 105, 105));
-                holder.textView.setTextSize(19f);
+                holder.textView.setTextSize(16f);
+                ((LrcView)holder.textView).setFocuse(true);
             } else {
                 holder.textView.setTextColor(Color.rgb(190, 190, 190));
                 holder.textView.setTextSize(16f);
+                ((LrcView)holder.textView).setFocuse(false);
             }
         }
     }

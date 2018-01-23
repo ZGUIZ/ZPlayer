@@ -2,14 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
+    <com.example.amia.zplayer.Activity.LrcView
         android:id="@+id/lrc_text"
         android:textSize="19dp"
-        android:layout_marginRight="22dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:paddingTop="6dp"
         android:paddingBottom="6dp"
         android:textColor="#BEBEBE"
         android:textAlignment="center"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
