@@ -143,15 +143,19 @@ public class PlayingActivityUtil {
                 position++;
             }
             else{
-                if(before.getTime()>time||position>lrc.size()){
+                if((before.getTime()>=time||position>lrc.size())){
                     position--;
                 }
+                if(position<=0){
+                    return 0;
+                }
             }
-            if(position>=lrc.size()-1){
+            if(position>=lrc.size()-1||lrc.get(position).getTime()==time){
                 break;
             }
             before=lrc.get(position);
             after=lrc.get(position+1);
+
 //            Log.i("PlayingAct","before="+before.getTime());
 //            Log.i("PlayingAct","time="+time);
 //            Log.i("PlayingAct","after="+after.getTime());

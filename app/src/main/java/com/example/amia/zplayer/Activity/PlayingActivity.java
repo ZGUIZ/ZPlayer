@@ -550,6 +550,11 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             setModeButton();       //设置播放模式按钮
             onLoadMusic(musicPlayManager.getCurretnMp3Info());  //加载当前音乐
             setPauseButtonIcon();
+
+            //亮屏时自动更新歌词信息
+            if(lrcAdapter!=null&&currentMp3Info!=null){
+                resetLrc(currentMp3Info);
+            }
         }
 
         @Override
