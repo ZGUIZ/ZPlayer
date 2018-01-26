@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"></android.support.v4.view.ViewPager>
         <ImageButton
             android:id="@+id/play_back_ib"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="25dp"
             android:layout_marginLeft="10dp"
             android:src="@drawable/back"
             android:scaleType="fitXY"

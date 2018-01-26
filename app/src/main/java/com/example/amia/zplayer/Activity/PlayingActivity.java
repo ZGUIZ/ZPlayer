@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -105,6 +107,19 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         Intent intent=new Intent(this,MusicService.class);
         startService(intent);
         init();
+        //setWindowColor();
+    }
+
+    private void setWindowColor(){
+        //5.x开始需要把颜色设置透明，否则导航栏会呈现系统默认的浅灰色
+        Window window = this.getWindow();
+        View decorView = window.getDecorView();
+        //两个 flag 要结合使用，表示让应用的主体内容占用系统状态栏的空间
+        int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        decorView.setSystemUiVisibility(option);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.TRANSPARENT);
     }
 
     //首次加载音乐信息
