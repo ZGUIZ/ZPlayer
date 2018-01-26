@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ripple xmlns:anroid="http://schemas.android.com/apk/res/android"
+    anroid:color="#aacccccc">
+    <item>
+        <shape anroid:shape="oval">
+            <solid anroid:color="@android:color/white"/>
+        </shape>
+    </item>
+</ripple>

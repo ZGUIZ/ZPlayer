@@ -70,7 +70,7 @@
                 android:scaleType="fitCenter"
                 android:layout_centerVertical="true"
                 android:src="@drawable/play_btton"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/botton_ripple_rad"
                 android:layout_centerInParent="true"
                 android:layout_width="60dp"
                 android:layout_height="60dp" />
@@ -79,27 +79,25 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginRight="30dp"
-                android:padding="3dp"
                 android:src="@drawable/pre"
                 android:scaleType="fitCenter"
                 android:layout_centerVertical="true"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/botton_ripple_rad"
                 android:layout_toLeftOf="@id/play_pause_ib"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="45dp"
+                android:layout_height="45dp" />
             <ImageButton
                 android:id="@+id/next_ib"
-                android:padding="3dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="30dp"
                 android:src="@drawable/next"
                 android:scaleType="fitCenter"
                 android:layout_centerVertical="true"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/botton_ripple_rad"
                 android:layout_toRightOf="@id/play_pause_ib"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="45dp"
+                android:layout_height="45dp" />
         </RelativeLayout>
     </LinearLayout>
 
