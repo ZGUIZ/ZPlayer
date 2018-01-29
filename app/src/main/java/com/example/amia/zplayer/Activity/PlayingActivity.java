@@ -367,6 +367,11 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         //设置歌词
         lrcList= LrcResovler.getLrc(info.getTitle(),info.getArtist());   //获取歌词
         PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView);
+
+        if(musicPlayManager!=null) {
+            curlrc = PlayingActivityUtil.firstfindCurrentLrc(lrcList, musicPlayManager.getCurrentPosition(), currentMp3Info);
+        }
+
         lrcAdapter.notifyDataSetChanged();
 
     }
