@@ -27,13 +27,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MusicService extends Service {
     private static MediaPlayer mediaPlayer;
     private Mp3Info curretnMp3Info;    //当前播放的音乐
     private List<Mp3Info> musiclist;   //当前播放的列表
     private boolean isPlaying;
-    //private boolean isScreenOn;
     private EarringPutOutReceiver headsetrPlugReceiver;
 
     private static int connCount=0;   //记录连接数量
@@ -45,6 +46,8 @@ public class MusicService extends Service {
     private PhoneCallListener pcl;//电话事件监听器
 
     public MusicPlayStatus status;//播放模式
+
+    private static ExecutorService executorService;  //线程池
 
     private final static String tranTarget="amia.musicplayer.action.MusicChange";
     private final static String currentPositionActionName="com.example.amia.musicplayer.currentPosition";
@@ -64,14 +67,20 @@ public class MusicService extends Service {
         if(status==null){
             status=MusicPlayStatus.listloop;
         }
+
+        //创建线程池
+        try{
+            executorService= Executors.newSingleThreadExecutor();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void onCreate(){
         super.onCreate();
         registerPhoneCallReceiver();
         registerHeadsetPlugReceiver();
-        //isScreenOn=true;
-        //registerScreenStatusReceiver();
     }
 
     //注册耳机事件接收者
@@ -93,32 +102,18 @@ public class MusicService extends Service {
     private void unregisiterPhoneCallReceiver(){
         manager.listen(pcl, PhoneStateListener.LISTEN_NONE);
     }
-/*
-    //注册屏幕状态监听者
-    private void registerScreenStatusReceiver(){
-        IntentFilter intentFilter=new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(screenReceiver,intentFilter);
-    }
-
-    //注销屏幕状态监听者
-    private void unregisterScreenStatusReceiver(){
-        unregisterReceiver(screenReceiver);
-    }
-*/
 
     private void addConnection(){
         if(connCount<=0){
-            sentCrrentTime();
+            sentCurrentTime();
         }
         connCount++;
-        Log.i("addConnection","connCount="+connCount);
+        //Log.i("addConnection","connCount="+connCount);
     }
 
     private void subConnection(){
         connCount--;
-        Log.i("subConncetion","connCount="+connCount);
+        //Log.i("subConncetion","connCount="+connCount);
     }
 
     @Override
@@ -134,12 +129,11 @@ public class MusicService extends Service {
 
     @Override
     public void onDestroy(){
-        Log.i("MusicServer","销毁：onDestory");
+        //Log.i("MusicServer","销毁：onDestory");
         unregisterReceiver(headsetrPlugReceiver);
         mediaPlayer.stop();
         mediaPlayer.release();
         unregisiterPhoneCallReceiver();
-        //unregisterScreenStatusReceiver();
         super.onDestroy();
     }
 
@@ -184,7 +178,7 @@ public class MusicService extends Service {
             mediaPlayer.prepare();
             mediaPlayer.start();
             isPlaying=true;
-            sentCrrentTime();
+            sentCurrentTime();
         }
         catch (IOException e){
             e.printStackTrace();
@@ -192,6 +186,31 @@ public class MusicService extends Service {
 
     }
 
+    private void sentCurrentTime(){
+        executorService.submit(new Runnable() {
+            private Intent intent=new Intent();
+            @Override
+            public void run() {
+                intent.setAction(currentPositionActionName);
+                int time=0;
+                int duration=mediaPlayer.getDuration();
+                while(isPlaying()&&(duration-time)>500&&connCount>0){
+                    time=mediaPlayer.getCurrentPosition();
+                    //Log.i("Service","time="+time);
+                    intent.removeExtra(currentPositionKey);
+                    intent.putExtra(currentPositionKey,time);
+                    sendBroadcast(intent);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    @Deprecated
     private void sentCrrentTime(){
         new Thread(new Runnable() {
             private Intent intent=new Intent();
@@ -229,7 +248,7 @@ public class MusicService extends Service {
     public void resumePlay(){
         mediaPlayer.start();
         isPlaying=true;
-        sentCrrentTime();
+        sentCurrentTime();
     }
 
     private void lastMusic(){
@@ -444,26 +463,4 @@ public class MusicService extends Service {
         }
     }
 
-    /*
-    BroadcastReceiver screenReceiver =new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(!isPlaying){
-                return;
-            }
-            String action=intent.getAction();
-            switch (action){
-                case Intent.ACTION_SCREEN_ON:
-                    //Log.i("ScreenReceiver","屏幕亮了");
-                    isScreenOn=true;
-                    sentCrrentTime();
-                    break;
-                case Intent.ACTION_SCREEN_OFF:
-                    //Log.i("ScreenReceiver","屏幕关了");
-                    isScreenOn=false;
-                    break;
-            }
-        }
-    };
-    */
 }
