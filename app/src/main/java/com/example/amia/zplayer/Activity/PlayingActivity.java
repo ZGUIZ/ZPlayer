@@ -50,6 +50,8 @@ import com.example.amia.zplayer.util.WindowInfoMananger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PlayingActivity extends MusicAboutActivity implements View.OnClickListener{
 
@@ -92,6 +94,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     private List<Map<String,Object>> lrcObject=new ArrayList<>();   //歌词适配SimpleAdapter转换的List
     private int curlrc;     //当前歌词所在位置
     //private boolean isDrag;  //是否被拖动
+    ExecutorService lrcDragThreadPool;   //lrc拖动线程池
 
     private static WindowInfoMananger wim;
     private static Point point;
@@ -107,6 +110,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         Intent intent=new Intent(this,MusicService.class);
         startService(intent);
         init();
+        lrcDragThreadPool = Executors.newCachedThreadPool();
         //setWindowColor();
     }
 
@@ -356,7 +360,8 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                             DragCancelRunnable.setDrag(true);
                             break;
                         case MotionEvent.ACTION_UP:
-                            new Thread(new DragCancelRunnable()).start();
+                            //new Thread(new DragCancelRunnable()).start();
+                            lrcDragThreadPool.submit(new DragCancelRunnable());
                             break;
                     }
                     return false;
@@ -644,6 +649,7 @@ class DragCancelRunnable implements Runnable{
             count++;
             isDrag=true;
             Thread.sleep(3000);
+
             count--;
             if(count==0){
                 isDrag=false;
