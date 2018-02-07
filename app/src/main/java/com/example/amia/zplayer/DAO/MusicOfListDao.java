@@ -127,7 +127,7 @@ public class MusicOfListDao {
         SQLiteDatabase db=dbhelper.getReadableDatabase();
         MusicOfList musicOfList=null;
         if(db.isOpen()){
-            Cursor cursor=db.query(tableName,null,"list_id = ?",new String[]{String.valueOf(list_id)},null,null,null);
+            Cursor cursor=db.query(tableName,null,"list_id = ? limit 1",new String[]{String.valueOf(list_id)},null,null,null);
             if(cursor.getCount()>0){
                 cursor.moveToFirst();
                 musicOfList=new MusicOfList();
