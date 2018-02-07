@@ -1,8 +1,6 @@
 package com.example.amia.zplayer.Service;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -123,7 +121,7 @@ public class MusicService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent){
-        Log.i("MusicService","解除绑定");
+        //Log.i("MusicService","解除绑定");
         return super.onUnbind(intent);
     }
 
