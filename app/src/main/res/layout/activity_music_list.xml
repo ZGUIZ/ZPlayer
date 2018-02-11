@@ -96,6 +96,6 @@
 
     <include layout="@layout/bottom_control"/>
     <include layout="@layout/bottom_tool_bar"
-        android:id="@+id/include" />
+        android:id="@+id/bottom_tool_bar" />
 
 </RelativeLayout>

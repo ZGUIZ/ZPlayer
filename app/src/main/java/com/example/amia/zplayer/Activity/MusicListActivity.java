@@ -189,8 +189,10 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                 musListAdapter.notifyDataSetChanged();
                 bottom_layout.setVisibility(View.INVISIBLE);
                 bottom_tool_layout.setVisibility(View.VISIBLE);
+                list_title.setVisibility(View.GONE);
                 all_sel_ll.setVisibility(View.VISIBLE);
                 cancel_tv.setVisibility(View.VISIBLE);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 return true;
             }
         });
@@ -587,11 +589,13 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     private void cancel_LongPress(){
         //backButton.setVisibility(View.VISIBLE);
         bottom_layout.setVisibility(View.VISIBLE);
+        list_title.setVisibility(View.VISIBLE);
         bottom_tool_layout.setVisibility(View.GONE);
         all_select_tv.setVisibility(View.VISIBLE);
         all_cancle.setVisibility(View.GONE);
         all_sel_ll.setVisibility(View.GONE);
         cancel_tv.setVisibility(View.GONE);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         isAfLoCl=false;
         musListAdapter.notifyDataSetChanged();
         for(Mp3Info info:checkedMus){
