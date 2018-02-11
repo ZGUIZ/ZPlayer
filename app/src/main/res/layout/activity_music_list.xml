@@ -7,23 +7,28 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context="com.example.amia.zplayer.Activity.MusicListActivity">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/head_bar"
-        android:background="#F5F5F5"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/include"
+        android:background="#F5F5F5">
+
         <RelativeLayout
+            android:layout_marginRight="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <TextView
                 android:id="@+id/list_name"
-                android:textColor="#363636"
-                android:paddingRight="12dp"
-                android:textAlignment="center"
-                android:textSize="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="所有音乐"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:textAlignment="center"
+                android:textColor="#363636"
+                android:textSize="17dp" />
             <!--
             <ImageButton
                 android:id="@+id/backbutton"
@@ -35,35 +40,38 @@
              -->
             <TextView
                 android:id="@+id/cancle_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:visibility="gone"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:text="取消"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:visibility="gone" />
+
             <RelativeLayout
                 android:id="@+id/all_select"
-                android:paddingRight="10dp"
-                android:visibility="gone"
-                android:layout_centerVertical="true"
-                android:orientation="horizontal"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:orientation="horizontal"
+                android:paddingRight="10dp"
+                android:visibility="gone">
+
                 <TextView
-                    android:text="全选"
                     android:id="@+id/all_select_tv"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:text="全选" />
+
                 <TextView
                     android:id="@+id/all_cancel"
-                    android:text="全不选"
-                    android:visibility="gone"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:text="全不选"
+                    android:visibility="gone" />
             </RelativeLayout>
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
@@ -87,6 +95,7 @@
     </RelativeLayout>
 
     <include layout="@layout/bottom_control"/>
-    <include layout="@layout/bottom_tool_bar"/>
+    <include layout="@layout/bottom_tool_bar"
+        android:id="@+id/include" />
 
 </RelativeLayout>
