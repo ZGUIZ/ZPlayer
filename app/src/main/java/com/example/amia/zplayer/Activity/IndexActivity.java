@@ -291,9 +291,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         love_ib.setImageDrawable(getResources().getDrawable(R.drawable.love,null));
     }
 
-    public class SelectionPagerAdapter extends FragmentPagerAdapter{
+    class SelectionPagerAdapter extends FragmentPagerAdapter{
 
-        public SelectionPagerAdapter(FragmentManager fm) {
+        SelectionPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

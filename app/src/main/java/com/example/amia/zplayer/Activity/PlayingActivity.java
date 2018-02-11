@@ -61,8 +61,6 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     protected static MusicServiceConnection musicServiceConnection;
     protected static MusicPlayManager musicPlayManager;
 
-    public static String getCurrentMp3InfoKey="currentMusic";
-
     private ViewPager viewPager;
     private TextView current_time_tv;
     private TextView acount_time_time;
@@ -112,18 +110,6 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         init();
         lrcDragThreadPool = Executors.newCachedThreadPool();
         //setWindowColor();
-    }
-
-    private void setWindowColor(){
-        //5.x开始需要把颜色设置透明，否则导航栏会呈现系统默认的浅灰色
-        Window window = this.getWindow();
-        View decorView = window.getDecorView();
-        //两个 flag 要结合使用，表示让应用的主体内容占用系统状态栏的空间
-        int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-        decorView.setSystemUiVisibility(option);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.TRANSPARENT);
     }
 
     //首次加载音乐信息
@@ -659,10 +645,10 @@ class DragCancelRunnable implements Runnable{
         }
     }
 
-    public static boolean isDrag() {
+    static boolean isDrag() {
         return isDrag;
     }
-    public static void setDrag(boolean Drag){
+    static void setDrag(boolean Drag){
         isDrag=Drag;
     }
 }

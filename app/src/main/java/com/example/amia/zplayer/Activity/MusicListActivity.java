@@ -11,7 +11,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -69,7 +71,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     private TextView title_tv;                  //音乐名称组件
     private TextView artist_tv;                 //演唱者名称组件
     private ImageView music_album;              //专辑图片组件
-    private ImageButton backButton;             //返回按钮
+    //private ImageButton backButton;             //返回按钮
     private TextView del_tv;                    //删除文本框
 
     private RelativeLayout bottom_tool_layout;  //长按后底部控制布局
@@ -112,9 +114,10 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
 
         list_title=findViewById(R.id.list_name);
         list_title.setText(intent.getStringExtra(listnameKey));
-
+        /*
         backButton=findViewById(R.id.backbutton);
         backButton.setOnClickListener(this);
+        */
         love_ib=findViewById(R.id.love_ib);
         love_ib.setOnClickListener(this);
 
@@ -158,6 +161,15 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         else{
             del_tv.setText("移除");
         }
+        setToolBar();
+    }
+
+    protected void setToolBar(){
+        //backButton.setVisibility(View.GONE);
+        Toolbar toolbar=findViewById(R.id.head_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(this);
     }
 
     public void setListAdpter(){
@@ -212,9 +224,11 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     @Override
     public void onClick(View view) {
         switch (view.getId()){
+            /*
             case R.id.backbutton:    //返回按钮
                 MusicListActivity.this.finish();
                 break;
+            */
             case R.id.startpause:   //暂停播放按钮
                 if(currentMp3Info==null){
                     Toast.makeText(this,"无播放的的音乐",Toast.LENGTH_SHORT).show();
@@ -261,6 +275,8 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                     addToLove();
                 }
                 break;
+            default:
+                finish();
         }
     }
 
@@ -569,7 +585,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     }
 
     private void cancel_LongPress(){
-        backButton.setVisibility(View.VISIBLE);
+        //backButton.setVisibility(View.VISIBLE);
         bottom_layout.setVisibility(View.VISIBLE);
         bottom_tool_layout.setVisibility(View.GONE);
         all_select_tv.setVisibility(View.VISIBLE);
@@ -706,7 +722,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                 holder.playing.setVisibility(View.GONE);
                 //设置复选框状态
                 holder.isSelect.setChecked(mp3Infos.get(i).isSelected());
-                backButton.setVisibility(View.GONE);
+                //backButton.setVisibility(View.GONE);
             }
             else{
                 holder.isSelect.setVisibility(View.GONE);
