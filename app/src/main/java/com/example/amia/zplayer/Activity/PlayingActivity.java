@@ -281,6 +281,12 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         PauseMusicFromService();
     }
 
+    @Override
+    public void onDestroy(){
+        lrcDragThreadPool.shutdown();
+        super.onDestroy();
+    }
+
     //暂停
     @Override
     public void PauseMusicFromService() {
@@ -459,6 +465,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
 
     //播放上一首
     private void playPreMus(){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"无播放的音乐！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         musicPlayManager.lastMusic();
         isplay=true;
         setPauseButtonIcon();
@@ -466,6 +476,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
 
     //播放下一首
     private void playNextMus(){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"无播放的音乐！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         musicPlayManager.nextMusic();
         isplay=true;
         setPauseButtonIcon();

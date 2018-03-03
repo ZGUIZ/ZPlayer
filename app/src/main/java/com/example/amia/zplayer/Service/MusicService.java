@@ -128,6 +128,7 @@ public class MusicService extends Service {
     @Override
     public void onDestroy(){
         //Log.i("MusicServer","销毁：onDestory");
+        executorService.shutdown();
         unregisterReceiver(headsetrPlugReceiver);
         mediaPlayer.stop();
         mediaPlayer.release();
