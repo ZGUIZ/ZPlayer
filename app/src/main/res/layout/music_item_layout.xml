@@ -64,8 +64,8 @@
                 android:id="@+id/isplaying"
                 android:visibility="gone"
                 android:background="@drawable/playing"
-                android:layout_width="25dp"
-                android:layout_height="25dp" />
+                android:layout_width="20dp"
+                android:layout_height="20dp" />
             <CheckBox
                 android:id="@+id/music_check"
                 android:visibility="gone"
