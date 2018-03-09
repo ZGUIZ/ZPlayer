@@ -15,15 +15,15 @@ public class LrcResovler {
     private static String lrcPath= Environment.getExternalStorageDirectory().getAbsolutePath();
     private static ArrayList<String> readLrcFile(String musicName, String artist){
         ArrayList<String> lrc=new ArrayList<>();
-        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MusicPlayer");
+        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer");
         if(!dir.exists()){
             dir.mkdir();
         }
-        File dir2=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MusicPlayer/lrc");
+        File dir2=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/lrc");
         if(!dir2.exists()){
             dir2.mkdir();
         }
-        String stlrc=ConvertFileCode.converfile(String.valueOf(lrcPath+"/MusicPlayer/lrc/"+artist+" - "+musicName+".lrc"));
+        String stlrc=ConvertFileCode.converfile(String.valueOf(lrcPath+"/ZPlayer/lrc/"+artist+" - "+musicName+".lrc"));
         if(!stlrc.equals("")){
             StringBuffer buffer=new StringBuffer(stlrc);
             while (buffer.length()>0) {

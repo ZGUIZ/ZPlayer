@@ -25,7 +25,6 @@ public class ConvertFileCode {
             bis=new BufferedInputStream(fis);
             bis.mark(4);
             byte[] first3bytes=new byte[3];
-//   System.out.println("");
             //找到文档的前三个字节并自动判断文档类型。
             bis.read(first3bytes);
             bis.reset();
