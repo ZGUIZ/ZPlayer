@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PlayingActivity extends MusicAboutActivity implements View.OnClickListener{
+public class PlayingActivity extends MusicAboutActivity implements View.OnClickListener,LrcShowedAct{
 
     protected static PauseMusicReceiver headsetrPlugReceiver;//耳机事件监听者
     protected static CurrentPositReceiver currentPositReceiver;//当前播放进度接受者
@@ -363,12 +363,11 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
 
         //设置歌词
         lrcList= LrcResovler.getLrc(info.getTitle(),info.getArtist());   //获取歌词
-        PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView);
+        PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView,this,0,currentMp3Info);
 
         if(musicPlayManager!=null) {
             curlrc = PlayingActivityUtil.firstfindCurrentLrc(lrcList, musicPlayManager.getCurrentPosition(), currentMp3Info);
         }
-
         lrcAdapter.notifyDataSetChanged();
 
     }
@@ -392,6 +391,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             lrcAdapter.notifyDataSetChanged();
         }
 
+
         //判断3秒内是否触摸过屏幕
         //如果触摸过，则不跳转对应的歌词上
         if(DragCancelRunnable.isDrag()){
@@ -411,7 +411,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             PlayingActivityUtil.setEmptyLrc(lrcObject,null_lrc_tv,lrc_listView);
             return;
         }
-        PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView);
+        PlayingActivityUtil.firstsetLrc(lrcList,lrcObject,null_lrc_tv,lrc_listView,this,1,currentMp3Info);
         curlrc=PlayingActivityUtil.firstfindCurrentLrc(lrcList,musicPlayManager.getCurrentPosition(),currentMp3Info);
         lrcAdapter.notifyDataSetChanged();
     }
@@ -551,6 +551,13 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             return;
         }
         super.onBackPressed();
+    }
+
+    @Override
+    public void setFirstLrc(Mp3Info info) {
+        Message msg=handler.obtainMessage();
+        msg.what=0;
+        handler.sendMessage(msg);
     }
 
     //切换音乐时音乐信息接收者

@@ -19,6 +19,7 @@ import com.example.amia.zplayer.MusicPlayStatus;
 import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.util.BitMapUtil;
+import com.example.amia.zplayer.util.DownloadUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,9 +112,17 @@ public class PlayingActivityUtil {
         return curset;
     }
 
-    public static void firstsetLrc(List<LrcEntity> lrc,List<Map<String,Object>> lrcObject, TextView null_lrc, ListView lrc_list_view){
+    public static void firstsetLrc(List<LrcEntity> lrc,List<Map<String,Object>> lrcObject, TextView null_lrc, ListView lrc_list_view,Context context,int trytime,Mp3Info info){
         if(lrc==null||lrc.size()==0){
-            return;
+            if(trytime==0) {
+                DownloadUtil util=new DownloadUtil(context);
+                util.tryDownloadLrc(info,trytime);
+                trytime++;
+                return;
+            }
+            else {
+                return;
+            }
         }
         null_lrc.setVisibility(View.INVISIBLE);
         lrc_list_view.setVisibility(View.VISIBLE);

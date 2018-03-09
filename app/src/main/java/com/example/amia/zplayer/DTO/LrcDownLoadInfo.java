@@ -6,6 +6,7 @@ package com.example.amia.zplayer.DTO;
 
 public class LrcDownLoadInfo {
 
+    private int id;
     private String music_name;
     private String artist;
     private int time;
@@ -43,4 +44,11 @@ public class LrcDownLoadInfo {
         this.url = url;
     }
 
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id=id;
+    }
 }
