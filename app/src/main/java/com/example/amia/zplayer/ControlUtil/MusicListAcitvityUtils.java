@@ -18,6 +18,7 @@ import com.example.amia.zplayer.util.MusicResolverUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Amia on 2017/12/10.
@@ -180,5 +181,18 @@ public class MusicListAcitvityUtils {
             musicIntent.setType("*/*");
             context.startActivity(Intent.createChooser(musicIntent, "分享到"));
         }
+    }
+
+    public static int findFromList(Mp3Info mp3Info,List<Mp3Info> mp3Infos){
+        return findFromList((int)mp3Info.getId(),mp3Infos);
+    }
+
+    public static int findFromList(int id, List<Mp3Info> mp3Infos){
+        for(int i=0;i<mp3Infos.size();i++){
+            if(mp3Infos.get(i).getId()==id){
+                return i;
+            }
+        }
+        return -1;
     }
 }

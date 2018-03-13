@@ -1,5 +1,6 @@
 package com.example.amia.zplayer.Activity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
@@ -50,6 +51,12 @@ public abstract class MusicAboutActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    protected void startActivity(Class cls){
+        Intent intent=new Intent(this,cls);
+        startActivity(intent);
+    }
+
     public abstract void setCurrentMusicInfo(Mp3Info info);
 
     Handler handler=new Handler(){

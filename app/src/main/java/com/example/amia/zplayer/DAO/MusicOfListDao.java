@@ -87,6 +87,9 @@ public class MusicOfListDao {
     }
 
     public ArrayList<MusicOfList> queryMusicByList(int list_id, String order){
+        if(order==null||order==""){
+            order="asc";
+        }
         ArrayList<MusicOfList> array=new ArrayList<>();
         SQLiteDatabase db=dbhelper.getReadableDatabase();
         if(order!=null){

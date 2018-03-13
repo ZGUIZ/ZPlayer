@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,11 +47,11 @@ import java.util.ArrayList;
 
 public class MusicListActivity extends MusicAboutActivity implements View.OnClickListener {
 
-    public static final String musiclistKey="mp3Infos";
     public static final String listnameKey="listname";
     private static final int msg_setadapter=0;
     private static final int msg_setinfo=1;
     private static final int request_del_code=101;
+    private static final int request_find_code=102;
 
     protected MusicListDao musicListDao;
     protected MusicOfListDao musicOfListDao;
@@ -71,7 +70,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     private TextView title_tv;                  //音乐名称组件
     private TextView artist_tv;                 //演唱者名称组件
     private ImageView music_album;              //专辑图片组件
-    //private ImageButton backButton;             //返回按钮
+    private ImageButton searchButton;             //搜索按钮
     private TextView del_tv;                    //删除文本框
 
     private RelativeLayout bottom_tool_layout;  //长按后底部控制布局
@@ -114,10 +113,10 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
 
         list_title=findViewById(R.id.list_name);
         list_title.setText(intent.getStringExtra(listnameKey));
-        /*
-        backButton=findViewById(R.id.backbutton);
-        backButton.setOnClickListener(this);
-        */
+
+        searchButton=findViewById(R.id.search_ib);
+        searchButton.setOnClickListener(this);
+
         love_ib=findViewById(R.id.love_ib);
         love_ib.setOnClickListener(this);
 
@@ -192,6 +191,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                 list_title.setVisibility(View.GONE);
                 all_sel_ll.setVisibility(View.VISIBLE);
                 cancel_tv.setVisibility(View.VISIBLE);
+                searchButton.setVisibility(View.GONE);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 return true;
             }
@@ -226,11 +226,6 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            /*
-            case R.id.backbutton:    //返回按钮
-                MusicListActivity.this.finish();
-                break;
-            */
             case R.id.startpause:   //暂停播放按钮
                 if(currentMp3Info==null){
                     Toast.makeText(this,"无播放的的音乐",Toast.LENGTH_SHORT).show();
@@ -245,7 +240,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                 break;
             case R.id.con_bar:
                 //打开播放界面
-                startPlayintActivity();
+                super.startActivity(PlayingActivity.class);
                 break;
             case R.id.next_ll:
                 playAfLongPress();
@@ -277,14 +272,13 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                     addToLove();
                 }
                 break;
+            case R.id.search_ib:
+                //startActivity(SearchActivity.class,getResources().getString(R.string.LIST_ID),new Integer(list_id));
+                findMusic();
+                break;
             default:
                 finish();
         }
-    }
-
-    private void startPlayintActivity(){
-        Intent intent=new Intent(this,PlayingActivity.class);
-        startActivity(intent);
     }
 
     private void addToLove(){
@@ -318,11 +312,17 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         currentMp3Info.setInLove(false);
         love_ib.setImageDrawable(getResources().getDrawable(R.drawable.love,null));
         if(love_id==list_id){
+            /*
             for(int i=0;i<mp3Infos.size();i++){
                 if(mp3Infos.get(i).getId()==currentMp3Info.getId()){
                     mp3Infos.remove(i);
                     break;
                 }
+            }
+            */
+            int res=MusicListAcitvityUtils.findFromList(currentMp3Info,mp3Infos);
+            if(res!=-1){
+                mp3Infos.remove(res);
             }
             musListAdapter.notifyDataSetChanged();
         }
@@ -378,6 +378,13 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
             startActivityForResult(intent,request_del_code);
         }
     }
+
+    private void findMusic(){
+        Intent intent=new Intent(this,SearchActivity.class);
+        intent.putExtra(getResources().getString(R.string.LIST_ID),list_id);
+        startActivityForResult(intent,request_find_code);
+    }
+
     //判断是否删除
     private void judle_del(boolean result){
         if(!result) {
@@ -563,6 +570,18 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         }
     }
 
+    /**
+     * 播放查询结果的音乐
+     * @param id
+     */
+    private void playResultMus(int id){
+        if(id==-1) {
+            return;
+        }
+        int res=MusicListAcitvityUtils.findFromList(id,mp3Infos);
+        play(mp3Infos.get(res),res);
+    }
+
     @Override
     public void onBackPressed(){
         if(isAfLoCl){
@@ -580,6 +599,9 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
             case request_del_code:
                 judle_del(data.getBooleanExtra("result",false));
                 break;
+            case request_find_code:
+                int id=data.getIntExtra("musicId",-1);
+                playResultMus(id);
             default:
                 break;
         }
@@ -595,6 +617,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         all_cancle.setVisibility(View.GONE);
         all_sel_ll.setVisibility(View.GONE);
         cancel_tv.setVisibility(View.GONE);
+        searchButton.setVisibility(View.VISIBLE);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         isAfLoCl=false;
         musListAdapter.notifyDataSetChanged();

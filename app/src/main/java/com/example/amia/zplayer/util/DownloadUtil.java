@@ -73,11 +73,9 @@ public class DownloadUtil {
         pool.submit(new Runnable() {
             @Override
             public void run() {
-                Log.i("TestActivity",url);
                 String result = null;
                 try {
                     result = NetUtils.requestDataFromNet(url);
-                    //Log.i("TestActivity",result);
                     List<Object> objects= JsonResolveUtils.resolveJson(result,LrcDownLoadInfo.class);
                     if(objects.size()>0) {
                         downLoadLrc((LrcDownLoadInfo) objects.get(i));
@@ -98,7 +96,6 @@ public class DownloadUtil {
     }
 
     protected void downLoadLrc(LrcDownLoadInfo info){
-        //Log.i("TestActivity","downLoadLrc");
         RequestParams params=new RequestParams("http://"+context.getResources().getString(R.string.down_host)+info.getUrl());
         params.setAutoRename(true);
         params.setSaveFilePath(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/lrc/"+info.getArtist()+" - "+info.getMusic_name()+".lrc");

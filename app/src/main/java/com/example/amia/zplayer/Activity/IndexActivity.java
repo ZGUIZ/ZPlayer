@@ -366,7 +366,8 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             case R.id.music_album:
             case R.id.con_bar:
                 //打开播放界面
-                startPlayingActivity();
+                //startPlayingActivity();
+                super.startActivity(PlayingActivity.class);
                 break;
             case R.id.startpause:
                 if(currentMp3Info==null){
@@ -390,10 +391,5 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 }
                 break;
         }
-    }
-
-    private void startPlayingActivity(){
-        Intent intent=new Intent(this,PlayingActivity.class);
-        startActivity(intent);
     }
 }
