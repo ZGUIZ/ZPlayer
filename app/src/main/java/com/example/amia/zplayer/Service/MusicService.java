@@ -182,6 +182,10 @@ public class MusicService extends Service {
         catch (IOException e){
             e.printStackTrace();
         }
+        catch (IllegalStateException e){
+            e.printStackTrace();
+            playMusic(url);
+        }
 
     }
 
