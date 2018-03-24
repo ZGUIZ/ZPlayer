@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.amia.zplayer.DAO.DownloadDao;
 import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
 
@@ -19,6 +20,7 @@ public class MusicListDatabaseHelper extends SQLiteOpenHelper {
 
     private String createMusicList_list="create table "+ MusicListDao.table_name+"(_id integer primary key, list_name varchar(20) unique, isDefault int default '0',isShow int default '1')";
     private String createMusicOfList="create table "+ MusicOfListDao.tableName+"(n_id integer primary key, list_id int,music_id int, foreign key(list_id) references "+ MusicListDao.table_name+"(_id))";
+    private String createDownLoadList="create table "+ DownloadDao.TABLENAME+" (d_id integer primary key, net_id integer,music_name varchar(20),artist varchar(20), finish int, net_uri varchar(100),uri varchar(100))";
     public static String musilst_list="musiclist_list";
     public static String DataBaseName="ZMusicPlayerDatabase";
     public static int DataBaseVersion=1;
@@ -33,9 +35,9 @@ public class MusicListDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(createMusicList_list);
         db.execSQL(createMusicOfList);
         db.execSQL("create unique index music_list_not_repeat on MusicOfList(list_id,music_id)");
+        db.execSQL(createDownLoadList);
 
         ContentValues contentValues=new ContentValues();
-        //contentValues.put("_id",1);
         contentValues.put("list_name","最近播放");
         contentValues.put("isDefault",1);
         contentValues.put("isShow",0);

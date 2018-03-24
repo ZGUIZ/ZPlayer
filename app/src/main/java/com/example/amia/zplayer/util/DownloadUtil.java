@@ -1,9 +1,14 @@
 package com.example.amia.zplayer.util;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.amia.zplayer.Activity.PlayingActivity;
+import com.example.amia.zplayer.DAO.DownloadDao;
 import com.example.amia.zplayer.DTO.LrcDownLoadInfo;
 import com.example.amia.zplayer.DTO.Mp3Info;
 import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
@@ -26,7 +31,9 @@ import java.util.concurrent.Executors;
 
 public class DownloadUtil {
 
-    private static ExecutorService pool= Executors.newFixedThreadPool(4);
+    public static ExecutorService pool= Executors.newFixedThreadPool(4);
+
+    public static final String PROGRESS_ACTION="com.example.amia.zplayer.util.downloadprogress";
 
     private String type;
     public static final String LRC="lrc";
@@ -34,8 +41,11 @@ public class DownloadUtil {
     private Mp3Info downInfo;
     private Context context;
 
+    private DownloadDao downloadDao;
+
     public DownloadUtil(Context context){
         this.context=context;
+        downloadDao=new DownloadDao(context);
     }
 
     public void downLoadOrderLrc(Mp3Info mp3Info,int num,int trytime){
@@ -104,18 +114,27 @@ public class DownloadUtil {
 
     public void downLoadMusic(MusicDownLoadInfo info){
         type=MUSIC;
-        RequestParams params=new RequestParams(info.getDownloadUrl());
+        downInfo=info;
+        RequestParams params=new RequestParams("http://"+context.getResources().getString(R.string.down_host)+info.getNetUrl());
         params.setAutoRename(true);
         params.setSaveFilePath(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+info.getArtist()+" - "+info.getTitle()+".mp3");
         downLoad(params);
     }
 
     private void downLoad(RequestParams params){
-        //Log.i("TestActivity","strat downLoad");
         x.http().post(params,new Callback.ProgressCallback<File>(){
+            LocalBroadcastManager manager=LocalBroadcastManager.getInstance(context);
             @Override
             public void onSuccess(File result) {
-                Log.i("DownLoad","success");
+                if(type.equals(MUSIC)) {
+                    Intent intent = new Intent();
+                    intent.setAction(PROGRESS_ACTION);
+                    intent.putExtra("id", ((MusicDownLoadInfo) downInfo).getNetId());
+                    intent.putExtra("progress", 100L);
+                    intent.putExtra("duration", 100L);
+                    //发送本地广播
+                    manager.sendBroadcast(intent);
+                }
             }
 
             @Override
@@ -133,6 +152,15 @@ public class DownloadUtil {
                 if(type.equals(LRC)||context instanceof PlayingActivity){
                     ((PlayingActivity)context).setFirstLrc(downInfo);
                 }
+                if(type.equals(MUSIC)){
+                    File file=new File(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+downInfo.getArtist()+" - "+downInfo.getTitle()+".mp3");
+                    Uri fileUri=Uri.fromFile(file);
+                    Intent intent=new Intent();
+                    intent.setAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    intent.setData(fileUri);
+                    context.sendBroadcast(intent);
+                    downloadDao.downloadFinish((MusicDownLoadInfo) downInfo);
+                }
             }
 
             @Override
@@ -147,7 +175,14 @@ public class DownloadUtil {
 
             @Override
             public void onLoading(long total, long current, boolean isDownloading) {
-                Log.i("Download","total="+total+"\tcurrent="+current);
+                //Log.i("Download","total="+total+"\tcurrent="+current);
+                Intent intent=new Intent();
+                intent.setAction(PROGRESS_ACTION);
+                intent.putExtra("id",((MusicDownLoadInfo)downInfo).getNetId());
+                intent.putExtra("progress",current);
+                intent.putExtra("duration",total);
+                //发送本地广播
+                manager.sendBroadcast(intent);
             }
         });
     }

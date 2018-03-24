@@ -48,7 +48,7 @@ import java.util.ArrayList;
 public class MusicListActivity extends MusicAboutActivity implements View.OnClickListener {
 
     public static final String listnameKey="listname";
-    private static final int msg_setadapter=0;
+    protected static final int msg_setadapter=0;
     private static final int msg_setinfo=1;
     private static final int request_del_code=101;
     private static final int request_find_code=102;
@@ -57,33 +57,33 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     protected MusicOfListDao musicOfListDao;
 
     protected int list_id;
-    private boolean isAfLoCl;
-    private  ArrayList<Mp3Info> checkedMus=new ArrayList<>();  //被勾选的音乐
+    protected boolean isAfLoCl;
+    protected   ArrayList<Mp3Info> checkedMus=new ArrayList<>();  //被勾选的音乐
 
-    private ListView music_list;                //音乐列表组件
+    protected ListView music_list;                //音乐列表组件
     private ArrayList<Mp3Info> mp3Infos;        //音乐信息列表
     private ImageButton love_ib;                //添加到喜欢列表按钮
     private ImageButton pausebutton;                 //暂停按钮
     private ProgressBar progressBar;            //进度条
     private static boolean isplay=false;        //正在播放
-    private TextView list_title;                //列表名称组件
+    protected TextView list_title;                //列表名称组件
     private TextView title_tv;                  //音乐名称组件
     private TextView artist_tv;                 //演唱者名称组件
     private ImageView music_album;              //专辑图片组件
-    private ImageButton searchButton;             //搜索按钮
+    protected ImageButton searchButton;             //搜索按钮
     private TextView del_tv;                    //删除文本框
 
-    private RelativeLayout bottom_tool_layout;  //长按后底部控制布局
+    protected RelativeLayout bottom_tool_layout;  //长按后底部控制布局
     private LinearLayout play_layout;  //长按播放按钮布局
     private LinearLayout add_layout;   //长按添加按钮布局
     private LinearLayout del_layout;   //长按删除按钮布局
     private LinearLayout share_layout; //长按分享按钮布局
-    private TextView cancel_tv;        //长按取消按钮
-    private RelativeLayout all_sel_ll;   //全选布局管理器
+    protected TextView cancel_tv;        //长按取消按钮
+    protected RelativeLayout all_sel_ll;   //全选布局管理器
     private TextView all_select_tv;     //全选
     private TextView all_cancle;     //全取消
 
-    private LinearLayout bottom_layout;
+    protected LinearLayout bottom_layout;
 
     private MusListAdapter musListAdapter;      //音乐列表适配器
 
@@ -103,6 +103,10 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         Intent intent1=new Intent(this,MusicService.class);
         startService(intent1);
         init(intent);
+        startResolveMusicThread();
+    }
+
+    protected void startResolveMusicThread(){
         resolveMusicThread.start();
     }
 
@@ -204,7 +208,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         });
     }
 
-    private void play(Mp3Info mp3Info,int position){
+    protected void play(Mp3Info mp3Info,int position){
         progressBar.setMax((int)mp3Info.getDuration());
         progressBar.setProgress(0);
         musicPlayManager.playMusic(mp3Infos,position);
@@ -213,7 +217,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         musListAdapter.notifyDataSetChanged();
     }
 
-    private void play(ArrayList<Mp3Info> mp3Infos){
+    protected void play(ArrayList<Mp3Info> mp3Infos){
         Mp3Info mp3Info=mp3Infos.get(0);
         progressBar.setMax((int)mp3Info.getDuration());
         progressBar.setProgress(0);

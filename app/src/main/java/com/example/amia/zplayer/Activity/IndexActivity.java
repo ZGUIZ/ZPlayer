@@ -94,6 +94,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         music_album.setOnClickListener(this);
         love_ib.setOnClickListener(this);
 
+        ImageButton searchButton=findViewById(R.id.net_search_ib);
+        searchButton.setOnClickListener(this);
+
         LinearLayout bottomll=findViewById(R.id.con_bar);
         bottomll.setOnClickListener(this);
 
@@ -366,7 +369,6 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             case R.id.music_album:
             case R.id.con_bar:
                 //打开播放界面
-                //startPlayingActivity();
                 super.startActivity(PlayingActivity.class);
                 break;
             case R.id.startpause:
@@ -389,6 +391,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 else {
                     addToLove();
                 }
+                break;
+            case R.id.net_search_ib:
+                super.startActivity(NetMusicSearchActivity.class);
                 break;
         }
     }

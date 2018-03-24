@@ -48,9 +48,17 @@
             android:configChanges="keyboardHidden|keyboard|orientation|screenSize"
             android:launchMode="singleTask"
             android:theme="@style/TranslucentLayout" />
-        <activity android:name=".Activity.SearchActivity"
-            android:theme="@style/TranslucentLayout">
-        </activity>
+        <activity
+            android:name=".Activity.SearchActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/TranslucentLayout" />
+        <activity
+            android:name=".Activity.NetMusicSearchActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/TranslucentLayout" />
+        <activity android:name=".Activity.DownloadActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/TranslucentLayout"></activity>
     </application>
 
 </manifest>

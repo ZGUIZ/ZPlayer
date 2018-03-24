@@ -40,7 +40,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private MusicResolverUtil musicResolverUtil=new MusicResolverUtil(SearchActivity.this);
     private MusicOfListDao musicOfListDao=new MusicOfListDao(SearchActivity.this);
-    private MusListAdapter adapter=new MusListAdapter();
+    private MusListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +51,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         init();
     }
 
-    private void init(){
+    protected void init(){
         search_tv=findViewById(R.id.sear_mus_tv);
         search_btn=findViewById(R.id.sear_res_ib);
         res_list=findViewById(R.id.res_list);
 
         search_btn.setOnClickListener(this);
-        res_list.setAdapter(adapter);
-        res_list.setOnItemClickListener(this);
+        setListAdapter();
 
         Toolbar toolbar=findViewById(R.id.res_toolbar);
         setSupportActionBar(toolbar);
@@ -66,6 +65,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         ActionBar actionBar=getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(this);
+    }
+
+    protected void setListAdapter(){
+        adapter=new MusListAdapter();
+        res_list.setAdapter(adapter);
+        res_list.setOnItemClickListener(this);
     }
 
     @Override

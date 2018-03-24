@@ -80,13 +80,13 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
     }
 
     private void onCreateFirstView(View view){
-        WebView webView=(WebView)view.findViewById(R.id.webview);
+        WebView webView=view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl("http://music.163.com/m/\n");
     }
 
     private void onCreateSecondView(View view){
-        ListView static_list=(ListView)view.findViewById(R.id.music_list_list);
+        ListView static_list=view.findViewById(R.id.music_list_list);
         musicListDao=new MusicListDao(activity);
         MusiclistListItemAdapter static_item_adapter;
         ArrayList<MusicList> staticLists=new ArrayList<>();
@@ -142,7 +142,7 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                 builder.show();
             }
         });
-        dynamic_lsit=(ListView)view.findViewById(R.id.dynamic_list);
+        dynamic_lsit=view.findViewById(R.id.dynamic_list);
 
         musicLists=musicListDao.queryListNotDefault();
         dynamic_item_adapter=new MusiclistListItemAdapter(activity,musicLists);
@@ -295,9 +295,10 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                 intent.putExtra("list_id",list_id);
                 break;
             case 3:
-                musicOfListDao=new MusicOfListDao(activity);
+                //musicOfListDao=new MusicOfListDao(activity);
                 musicListDao=new MusicListDao(activity);
                 list_id=musicListDao.getList_id("下载管理");
+                intent=new Intent(activity,DownloadActivity.class);
                 intent.putExtra(MusicListActivity.listnameKey,"下载管理");
                 intent.putExtra("list_id",list_id);
                 break;

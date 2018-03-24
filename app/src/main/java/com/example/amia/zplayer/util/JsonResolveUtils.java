@@ -1,6 +1,7 @@
 package com.example.amia.zplayer.util;
 
 import com.example.amia.zplayer.DTO.LrcDownLoadInfo;
+import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +19,14 @@ public class JsonResolveUtils{
     public static List<Object> resolveJson(String result,Class type) throws JSONException {
         List<Object> list=new ArrayList<>();
         JSONObject jsonObject=new JSONObject(result);
-        JSONArray jsonArray=jsonObject.getJSONArray("lrc");
+        String str=null;
+        if(type.getName().equals(LrcDownLoadInfo.class.getName())){
+            str="lrc";
+        }
+        if(type.getName().equals(MusicDownLoadInfo.class.getName())){
+            str="music";
+        }
+        JSONArray jsonArray=jsonObject.getJSONArray(str);
         for(int i=0;i<jsonArray.length();i++){
             JSONObject object=jsonArray.getJSONObject(i);
             list.add(changToTargetType(object,type));
@@ -33,6 +41,16 @@ public class JsonResolveUtils{
             info.setMusic_name(jsonObject.getString("name"));
             info.setArtist(jsonObject.getString("artist"));
             info.setUrl(jsonObject.getString("url"));
+            return info;
+        }
+        if(type.getName().equals(MusicDownLoadInfo.class.getName())){
+            MusicDownLoadInfo info=new MusicDownLoadInfo();
+            info.setNetId(jsonObject.getInt("id"));
+            info.setArtist(jsonObject.getString("artist"));
+            info.setBps(jsonObject.getInt("bps"));
+            info.setReckTime(jsonObject.getInt("length"));
+            info.setTitle(jsonObject.getString("name"));
+            info.setNetUrl(jsonObject.getString("url"));
             return info;
         }
         return null;
