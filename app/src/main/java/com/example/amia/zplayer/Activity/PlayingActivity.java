@@ -397,8 +397,8 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         if(DragCancelRunnable.isDrag()){
             return;
         }
-        if(curlrc-5>0){
-            lrc_listView.setSelection(curlrc-5);
+        if(curlrc-6>0){
+            lrc_listView.setSelection(curlrc-6);
         }
         else{
             lrc_listView.setSelection(0);
@@ -507,6 +507,9 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 break;
             case singleloop:
                 mode_ib.setImageDrawable(getResources().getDrawable(R.drawable.singleloop,null));
+                break;
+            case ramdom:
+                mode_ib.setImageDrawable(getResources().getDrawable(R.drawable.random,null));
                 break;
         }
     }

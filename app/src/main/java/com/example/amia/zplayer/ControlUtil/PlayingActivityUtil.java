@@ -51,6 +51,9 @@ public class PlayingActivityUtil {
                 status=MusicPlayStatus.singleloop;
                 break;
             case singleloop:
+                status=MusicPlayStatus.ramdom;
+                break;
+            case ramdom:
                 status=MusicPlayStatus.listloop;
                 break;
         }

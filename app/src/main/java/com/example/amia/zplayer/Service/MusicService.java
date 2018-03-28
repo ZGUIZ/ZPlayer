@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -434,6 +435,11 @@ public class MusicService extends Service {
                         //Log.i("MusicService","index="+index);
                         int next = (index + 1) % musiclist.size();
                         playMusic(musiclist, next);
+                        break;
+                    case ramdom:
+                        Random random=new Random();
+                        int ne=random.nextInt(musiclist.size())%musiclist.size();
+                        playMusic(musiclist,ne);
                         break;
                     case sequence:
                     default:

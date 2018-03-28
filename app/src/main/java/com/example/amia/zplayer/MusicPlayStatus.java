@@ -7,5 +7,5 @@ import java.io.Serializable;
  */
 
 public enum MusicPlayStatus implements Serializable {
-    listloop,singleloop,sequence;
+    listloop,singleloop,sequence,ramdom;
 }
