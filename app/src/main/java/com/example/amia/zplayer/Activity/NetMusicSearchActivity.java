@@ -91,19 +91,22 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
 
     private void searchMusic(){
         resInfo.clear();
-        progressBar.setVisibility(View.VISIBLE);
         reachStr=search_tv.getText().toString();
+        if(reachStr.trim().equals("")){
+            Toast.makeText(this,"请输入要查找的关键字",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        progressBar.setVisibility(View.VISIBLE);
         pool.submit(new Runnable() {
             @Override
             public void run() {
                 SearchMusicJson search=new SearchMusicJson();
-                String res=search.searchMusic(NetMusicSearchActivity.this,reachStr);
                 try {
+                    String res=search.searchMusic(NetMusicSearchActivity.this,reachStr);
                     resInfo=JsonResolveUtils.resolveJson(res,MusicDownLoadInfo.class);
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(NetMusicSearchActivity.this,"没有查询到对应的结果",Toast.LENGTH_SHORT).show();
-                    return;
+                    resInfo.clear();
                 }
                 Message msg=handler.obtainMessage();
                 msg.what=SETLISTMESSAGE;
@@ -166,11 +169,18 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
             switch (msg.what){
                 case SETLISTMESSAGE:
                     progressBar.setVisibility(View.GONE);
+                    isResultEmpty();
                     adapter.notifyDataSetChanged();
                     break;
             }
         }
     };
+
+    private void isResultEmpty(){
+        if(resInfo==null||resInfo.isEmpty()){
+            Toast.makeText(this,"没有找到对应的结果！",Toast.LENGTH_SHORT).show();
+        }
+    }
 
     class NetMusicAdapter extends BaseAdapter{
 

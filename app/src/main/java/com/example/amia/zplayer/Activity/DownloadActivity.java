@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -30,6 +29,7 @@ public class DownloadActivity extends MusicListActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         registerProgressReceiver();
+        findViewById(R.id.search_ib).setVisibility(View.GONE);
     }
 
     @Override
@@ -128,7 +128,6 @@ public class DownloadActivity extends MusicListActivity {
     class DownLoadReceiver extends DownloadProgReceiver {
         @Override
         protected void displayProgress(int id, long progress, long duration) {
-            //Log.i("DownLoadRec","progress="+progress+"\tduration="+duration);
             List<DownloadAdapter.Holder> holderList=adapter.getHolderList();
             for(DownloadAdapter.Holder holder:holderList){
                 if(holder.info.getNetId()==id){
