@@ -30,8 +30,6 @@ import com.example.amia.zplayer.View.ProgressView;
 import com.example.amia.zplayer.util.DownloadUtil;
 import com.example.amia.zplayer.util.JsonResolveUtils;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;

@@ -17,20 +17,15 @@ import java.net.MalformedURLException;
 
 public class SearchMusicJson {
 
-    public String searchMusic(Context context, String ... searchCond){
+    public String searchMusic(Context context, String ... searchCond) throws MalformedURLException {
         StringBuffer sb=getUrlString(context);
         sb.append(ConvertStringCode.toBase64Second(searchCond[0]));
         if(searchCond.length==2){
             sb.append("&pageNo=");
             sb.append(searchCond[1]);
         }
-        try {
-            String res=NetUtils.requestDataFromNet(sb.toString());
-            return res;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        String res=NetUtils.requestDataFromNet(sb.toString());
+        return res;
     }
 
     private StringBuffer getUrlString(Context context){

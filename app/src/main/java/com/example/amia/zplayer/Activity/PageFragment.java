@@ -3,27 +3,49 @@ package com.example.amia.zplayer.Activity;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
+import com.example.amia.zplayer.DTO.MusicClassify;
 import com.example.amia.zplayer.DTO.MusicList;
 import com.example.amia.zplayer.R;
+import com.example.amia.zplayer.util.BitMapUtil;
+import com.example.amia.zplayer.util.JsonResolveUtils;
+import com.example.amia.zplayer.util.NetUtils;
+import com.example.amia.zplayer.util.WindowInfoMananger;
 
+import org.json.JSONException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +53,8 @@ import java.util.Map;
  */
 
 public class PageFragment extends Fragment implements AdapterView.OnItemClickListener{
+
+    private static final int SET_FIRST_FRAGEMENT=0;
 
     protected int divide;
     private static final String ARG_SECTION_NUMBER = "section_number";
@@ -41,7 +65,9 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
     protected ListView dynamic_lsit;
     protected ArrayList<MusicList> list_array;//存储列表
 
-    protected ArrayList<MusicList> musicLists;
+    protected ArrayList<MusicList> musicLists;  //音乐列表List
+    protected List<Object> classifyList=new ArrayList<>();  //音乐类别List
+    protected ClassifyAdapter adapter;
 
     protected View firstPageView;
     protected View secondPageView;
@@ -80,9 +106,71 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
     }
 
     private void onCreateFirstView(View view){
-        WebView webView=view.findViewById(R.id.webview);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("http://music.163.com/m/\n");
+        RecyclerView recyclerView=view.findViewById(R.id.classify_rv);
+        GridLayoutManager manager=new GridLayoutManager(activity,3);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        adapter=new ClassifyAdapter();
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                MusicClassify classify= (MusicClassify) classifyList.get(position);
+                Intent intent=new Intent(activity,NetMusListActivity.class);
+                intent.putExtra("classify",classify);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+            }
+        });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String res;
+                try {
+                    res= NetUtils.requestDataFromNet(getResources().getString(R.string.findAllClassify));
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    res=null;
+                }
+                Message msg=handler.obtainMessage();
+                Bundle bundle=new Bundle();
+                bundle.putString("result",res);
+                msg.setData(bundle);
+                msg.what=SET_FIRST_FRAGEMENT;
+                handler.sendMessage(msg);
+            }
+        }).start();
+    }
+
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            switch (msg.what){
+                case SET_FIRST_FRAGEMENT:
+                    Bundle bundle=msg.getData();
+                    setFirstFragement(bundle.getString("result"));
+                    break;
+            }
+        }
+    };
+
+    protected void setFirstFragement(String result){
+        if(result==null||result==""){
+            Toast.makeText(activity,"网络连接异常！",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            classifyList= JsonResolveUtils.resolveJson(result, MusicClassify.class);
+            adapter.notifyDataSetChanged();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(activity,"网络连接异常！",Toast.LENGTH_SHORT).show();
+            return;
+        }
     }
 
     private void onCreateSecondView(View view){
@@ -313,5 +401,105 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
         intent.putExtra(MusicListActivity.listnameKey,musicList.get_Name());
         intent.putExtra("list_id",musicList.get_id());
         activity.startActivity(intent);
+    }
+
+    class ClassifyAdapter extends RecyclerView.Adapter<ClassifyAdapter.ClassifyHolder>{
+
+        private OnItemClickListener mOnItemClickListener;
+
+        private List<ClassifyHolder> holderList=new ArrayList<>();
+
+        @Override
+        public ClassifyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            ClassifyHolder holder=new ClassifyHolder(LayoutInflater.from(activity).inflate(R.layout.classify_item_layout,parent,false));
+            holderList.add(holder);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(final ClassifyHolder holder, int position) {
+            final MusicClassify classify=(MusicClassify)classifyList.get(position);
+            holder.class_id=classify.getId();
+            holder.title_tv.setText(classify.getName());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        Bundle bundle=new Bundle();
+                        bundle.putInt("class_id",holder.class_id);
+                        Bitmap bitmap=NetUtils.getURLImage("http://"+getResources().getString(R.string.down_host)+classify.getIconurl());
+                        Message msg=bitmapHandler.obtainMessage();
+                        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
+                        bundle.putByteArray("bitmap",outputStream.toByteArray());
+                        msg.setData(bundle);
+                        bitmapHandler.sendMessage(msg);
+                    }
+                    catch (IOException e){
+                        e.printStackTrace();
+                        Toast.makeText(activity,"网络异常，无法加载图片",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).start();
+            if(mOnItemClickListener!=null){
+                holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int pos=holder.getLayoutPosition();
+                        mOnItemClickListener.onItemClick(holder.relativeLayout,pos);
+                    }
+                });
+                holder.relativeLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        int pos=holder.getLayoutPosition();
+                        mOnItemClickListener.onItemLongClick(holder.relativeLayout,pos);
+                        return false;
+                    }
+                });
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return classifyList.size();
+        }
+
+        public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+            mOnItemClickListener=onItemClickListener;
+        }
+
+        class ClassifyHolder extends RecyclerView.ViewHolder{
+            int class_id;
+            RelativeLayout relativeLayout;
+            ImageView icon_iv;
+            TextView title_tv;
+
+            public ClassifyHolder(View itemView) {
+                super(itemView);
+                relativeLayout=itemView.findViewById(R.id.classify_rl);
+                icon_iv=itemView.findViewById(R.id.classify_icon);
+                title_tv=itemView.findViewById(R.id.classify_name_tv);
+            }
+        }
+
+        Handler bitmapHandler=new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                WindowInfoMananger wim=new WindowInfoMananger((AppCompatActivity) activity);
+                Point point=wim.getScreenWidthHight();
+                int height=point.x/3-10;
+                Bundle bundle=msg.getData();
+                int class_id=bundle.getInt("class_id");
+                byte[] bitmapBytes=bundle.getByteArray("bitmap");
+                Bitmap bitmap= BitmapFactory.decodeByteArray(bitmapBytes,0,bitmapBytes.length);
+                for(ClassifyHolder holder:holderList){
+                    if(holder.class_id==class_id){
+                        bitmap= BitMapUtil.getOrderSizeBitmap(bitmap,height,height);
+                        holder.icon_iv.setImageBitmap(bitmap);
+                    }
+                }
+            }
+        };
     }
 }

@@ -107,7 +107,6 @@ public class DownloadActivity extends MusicListActivity {
                     break;
             }
         }
-
     }
 
     protected void adapterDataSetChanged() {

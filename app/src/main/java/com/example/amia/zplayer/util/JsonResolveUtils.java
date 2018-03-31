@@ -1,6 +1,7 @@
 package com.example.amia.zplayer.util;
 
 import com.example.amia.zplayer.DTO.LrcDownLoadInfo;
+import com.example.amia.zplayer.DTO.MusicClassify;
 import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 
 import org.json.JSONArray;
@@ -25,6 +26,9 @@ public class JsonResolveUtils{
         }
         if(type.getName().equals(MusicDownLoadInfo.class.getName())){
             str="music";
+        }
+        if(type.getName().equals(MusicClassify.class.getName())){
+            str="musclassify";
         }
         JSONArray jsonArray=jsonObject.getJSONArray(str);
         for(int i=0;i<jsonArray.length();i++){
@@ -52,6 +56,13 @@ public class JsonResolveUtils{
             info.setTitle(jsonObject.getString("name"));
             info.setNetUrl(jsonObject.getString("url"));
             return info;
+        }
+        if(type.getName().equals(MusicClassify.class.getName())){
+            MusicClassify classify=new MusicClassify();
+            classify.setId(jsonObject.getInt("id"));
+            classify.setName(jsonObject.getString("name"));
+            classify.setIconurl(jsonObject.getString("iconurl"));
+            return classify;
         }
         return null;
     }
