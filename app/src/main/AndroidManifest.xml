@@ -56,7 +56,11 @@
             android:name=".Activity.NetMusicSearchActivity"
             android:launchMode="singleTask"
             android:theme="@style/TranslucentLayout" />
-        <activity android:name=".Activity.DownloadActivity"
+        <activity
+            android:name=".Activity.DownloadActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/TranslucentLayout" />
+        <activity android:name=".Activity.NetMusListActivity"
             android:launchMode="singleTask"
             android:theme="@style/TranslucentLayout"></activity>
     </application>
