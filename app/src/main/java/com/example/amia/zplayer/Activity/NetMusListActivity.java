@@ -8,21 +8,25 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,9 +46,11 @@ import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PauseMusicReceiver;
 import com.example.amia.zplayer.Service.MusicService;
 import com.example.amia.zplayer.View.ProgressView;
+import com.example.amia.zplayer.util.BitMapUtil;
 import com.example.amia.zplayer.util.DownloadUtil;
 import com.example.amia.zplayer.util.JsonResolveUtils;
 import com.example.amia.zplayer.util.NetUtils;
+import com.example.amia.zplayer.util.WindowInfoMananger;
 
 import org.json.JSONException;
 
@@ -115,19 +121,36 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
 
         waitProgress=findViewById(R.id.wait_progress);
         adapter=new NetMusicAdapter();
+        /*
         ListView listView=findViewById(R.id.net_music_list);
         listView.setDivider(null);
         listView.setAdapter(adapter);
 
         ((TextView)findViewById(R.id.net_list_name)).setText(classify.getName());
         setToolBar();
+        */
+        RecyclerView recyclerView=findViewById(R.id.net_list_rv);
+        GridLayoutManager manager=new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        adapter=new NetMusicAdapter();
+        recyclerView.setAdapter(adapter);
+        CollapsingToolbarLayout toolbarLayout=findViewById(R.id.collapsing_toolbar);
+        toolbarLayout.setTitleEnabled(true);
+        toolbarLayout.setTitle(classify.getName());
+        ImageView imageView=findViewById(R.id.list_icon_iv);
+        byte[] bitmapByte=intent.getByteArrayExtra("bitmap");
+        WindowInfoMananger wim=new WindowInfoMananger(this);
+        Point point=wim.getScreenWidthHight();
+        Bitmap bitmap=BitMapUtil.getOrderSizeBitmap(BitmapFactory.decodeByteArray(bitmapByte,0,bitmapByte.length),point.x,point.x);
+        imageView.setImageBitmap(bitmap);
+        setToolBar();
     }
 
     protected void setToolBar(){
-        Toolbar toolbar=findViewById(R.id.net_tool_bar);
+        Toolbar toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbar.setNavigationOnClickListener(this);
     }
 
@@ -137,7 +160,6 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             public void run() {
                 String res=null;
                 try {
-                    Log.i("Thread","id="+classify.getId());
                     res= NetUtils.requestDataFromNet(getResources().getString(R.string.queryMusicInList)+classify.getId());
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -153,11 +175,14 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     protected void resolveMusicInfo(String json){
         waitProgress.setVisibility(View.GONE);
         if(json==null||json.trim().equals("")){
-            findViewById(R.id.no_res).setVisibility(View.VISIBLE);
+            Toast.makeText(this,"该歌单没有音乐！",Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             resInfo= JsonResolveUtils.resolveJson(json,MusicDownLoadInfo.class);
+            if(adapter!=null) {
+                adapter.notifyDataSetChanged();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -428,76 +453,6 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         }
     }
 
-    class NetMusicAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return resInfo.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return resInfo.get(i);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return ((MusicDownLoadInfo)resInfo.get(i)).getNetId();
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            Holder holder;
-            if(view==null){
-                view=View.inflate(NetMusListActivity.this,R.layout.net_item_layout,null);
-                holder=new Holder();
-                holder.title=view.findViewById(R.id.net_title_tv);
-                holder.artist=view.findViewById(R.id.net_artist_tv);
-                holder.listen=view.findViewById(R.id.try_listen_ib);
-                holder.download=view.findViewById(R.id.download_ib);
-                holder.progressView=view.findViewById(R.id.down_progress);
-                ListItemClickListener listener=new ListItemClickListener();
-                holder.listener=listener;
-                holder.listen.setOnClickListener(listener);
-                holder.download.setOnClickListener(listener);
-                view.setTag(holder);
-                holderList.add(holder);
-            }
-            else{
-                holder=(Holder) view.getTag();
-            }
-            holder.listener.setInfo(i,holder);
-            MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
-            holder.net_id=info.getNetId();
-            holder.title.setText(info.getTitle());
-            holder.artist.setText(info.getArtist());
-            holder.info= (MusicDownLoadInfo) resInfo.get(i);
-            switch (holder.info.getStatus()){
-                case 0:
-                    holder.download.setVisibility(View.VISIBLE);
-                    holder.progressView.setVisibility(View.GONE);
-                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button,null));
-                    holder.download.setClickable(true);
-                    break;
-                case 1:
-                    holder.download.setVisibility(View.INVISIBLE);
-                    holder.progressView.setVisibility(View.VISIBLE);
-                    holder.progressView.setDuration(holder.duration);
-                    holder.progressView.setProgress(holder.progress);
-                    break;
-                case 2:
-                    //Log.i("NetMusic","status=2");
-                    holder.download.setVisibility(View.VISIBLE);
-                    holder.progressView.setVisibility(View.GONE);
-                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.finish,null));
-                    holder.download.setClickable(false);
-                    break;
-            }
-
-            return view;
-        }
-    }
-
     protected void download(int i,final Holder holder){
         final MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
         if(downloadDao.isInList(info.getNetId())){
@@ -524,11 +479,58 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     private void download(Holder holder){
         DownloadUtil util=new DownloadUtil(this);
         util.downLoadMusic(holder.info);
-        holder.info.setStatus(1);
         SearchMusicJson.addToDownDatabase(this,holder.info);
     }
 
-    class Holder{
+    class NetMusicAdapter extends RecyclerView.Adapter<Holder>{
+        @Override
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Holder holder=new Holder(LayoutInflater.from(NetMusListActivity.this).inflate(R.layout.net_item_layout,null));
+            ListItemClickListener listener=new ListItemClickListener();
+            holder.listener=listener;
+            holder.listen.setOnClickListener(listener);
+            holder.download.setOnClickListener(listener);
+            holderList.add(holder);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(Holder holder, int position) {
+            MusicDownLoadInfo info= (MusicDownLoadInfo) resInfo.get(position);
+            holder.net_id=info.getNetId();
+            holder.title.setText(info.getTitle());
+            holder.artist.setText(info.getArtist());
+            //holder.listener.i=position;
+            holder.listener.setInfo(position,holder);
+            holder.info= info;
+            switch (holder.info.getStatus()){
+                case 0:
+                    holder.download.setVisibility(View.VISIBLE);
+                    holder.progressView.setVisibility(View.GONE);
+                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button,null));
+                    holder.download.setClickable(true);
+                    break;
+                case 1:
+                    holder.download.setVisibility(View.INVISIBLE);
+                    holder.progressView.setVisibility(View.VISIBLE);
+                    break;
+                case 2:
+                    holder.download.setVisibility(View.VISIBLE);
+                    holder.progressView.setVisibility(View.GONE);
+                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.finish,null));
+                    holder.download.setClickable(false);
+                    break;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return resInfo.size();
+        }
+
+    }
+
+    class Holder extends RecyclerView.ViewHolder{
         int net_id;
         TextView title;
         TextView artist;
@@ -536,9 +538,15 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         ImageButton download;
         ProgressView progressView;
         ListItemClickListener listener;
-        long progress;
-        long duration;
         MusicDownLoadInfo info;
+        public Holder(View itemView) {
+            super(itemView);
+            title=itemView.findViewById(R.id.net_title_tv);
+            artist=itemView.findViewById(R.id.net_artist_tv);
+            listen=itemView.findViewById(R.id.try_listen_ib);
+            download=itemView.findViewById(R.id.download_ib);
+            progressView=itemView.findViewById(R.id.down_progress);
+        }
     }
 
     class ListItemClickListener implements View.OnClickListener{
@@ -567,28 +575,33 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         protected void displayProgress(int id, long progress, long duration) {
             for(Holder holder:holderList){
                 if(holder.net_id==id){
+                    int set=resInfo.indexOf(holder.info);
                     if(progress==duration){
-                        //Log.i("DownLoadRec","equal");
-                        holder.progress=progress;
-                        holder.duration=duration;
+                        holder.progressView.setProgress(progress);
+                        holder.progressView.setDuration(duration);
                         holder.info.setStatus(2);
-                        adapter.notifyDataSetChanged();
-                        return;
+                        adapter.notifyItemChanged(set);
                     }
-                    holder.info.setStatus(1);
-                    holder.progress=progress;
-                    holder.duration=duration;
-                    adapter.notifyDataSetChanged();
+                    else {
+                        if(holder.info.getStatus()!=1) {
+                            holder.info.setStatus(1);
+                            adapter.notifyItemChanged(set);
+                        }
+                        holder.progressView.setProgress(progress);
+                        holder.progressView.setDuration(duration);
+
+                    }
                     return;
                 }
             }
             //如果没有在当前显示的item中
             if(progress==duration){
                 //设置标志下载完毕
-                for(Object object:resInfo){
-                    MusicDownLoadInfo info=(MusicDownLoadInfo)object;
+                for(int i=0;i<resInfo.size();i++){
+                    MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
                     if(info.getNetId()==id){
                         info.setStatus(2);
+                        //adapter.notifyItemChanged(i);
                         break;
                     }
                 }

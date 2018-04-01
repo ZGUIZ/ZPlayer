@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -118,6 +119,8 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                 MusicClassify classify= (MusicClassify) classifyList.get(position);
                 Intent intent=new Intent(activity,NetMusListActivity.class);
                 intent.putExtra("classify",classify);
+                Bitmap bitmap=(view.findViewById(R.id.classify_icon)).getDrawingCache();
+                intent.putExtra("bitmap",BitMapUtil.bitmapToByte(bitmap));
                 startActivity(intent);
             }
 
@@ -421,6 +424,7 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
             final MusicClassify classify=(MusicClassify)classifyList.get(position);
             holder.class_id=classify.getId();
             holder.title_tv.setText(classify.getName());
+            holder.icon_iv.setDrawingCacheEnabled(true);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -490,14 +494,19 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                 Point point=wim.getScreenWidthHight();
                 int height=point.x/3-10;
                 Bundle bundle=msg.getData();
-                int class_id=bundle.getInt("class_id");
-                byte[] bitmapBytes=bundle.getByteArray("bitmap");
-                Bitmap bitmap= BitmapFactory.decodeByteArray(bitmapBytes,0,bitmapBytes.length);
-                for(ClassifyHolder holder:holderList){
-                    if(holder.class_id==class_id){
-                        bitmap= BitMapUtil.getOrderSizeBitmap(bitmap,height,height);
-                        holder.icon_iv.setImageBitmap(bitmap);
+                try {
+                    int class_id = bundle.getInt("class_id");
+                    byte[] bitmapBytes = bundle.getByteArray("bitmap");
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+                    for (ClassifyHolder holder : holderList) {
+                        if (holder.class_id == class_id) {
+                            bitmap = BitMapUtil.getOrderSizeBitmap(bitmap, height, height);
+                            holder.icon_iv.setImageBitmap(bitmap);
+                        }
                     }
+                }
+                catch (Exception e){
+                    Toast.makeText(activity,"网络连接异常！",Toast.LENGTH_SHORT).show();
                 }
             }
         };

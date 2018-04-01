@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -137,5 +138,11 @@ public class BitMapUtil {
             Log.i("BitMapUtil",path);
         }
         return path;
+    }
+
+    public static byte[] bitmapToByte(Bitmap bitmap){
+        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
+        return outputStream.toByteArray();
     }
 }
