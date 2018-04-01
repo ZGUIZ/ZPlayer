@@ -20,8 +20,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,6 +137,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         adapter=new NetMusicAdapter();
         recyclerView.setAdapter(adapter);
+        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         CollapsingToolbarLayout toolbarLayout=findViewById(R.id.collapsing_toolbar);
         toolbarLayout.setTitleEnabled(true);
         toolbarLayout.setTitle(classify.getName());
@@ -576,21 +579,15 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             for(Holder holder:holderList){
                 if(holder.net_id==id){
                     int set=resInfo.indexOf(holder.info);
+                    holder.progressView.setDuration(duration);
+                    holder.progressView.setProgress(progress);
                     if(progress==duration){
-                        holder.progressView.setProgress(progress);
-                        holder.progressView.setDuration(duration);
                         holder.info.setStatus(2);
-                        adapter.notifyItemChanged(set);
                     }
                     else {
-                        if(holder.info.getStatus()!=1) {
-                            holder.info.setStatus(1);
-                            adapter.notifyItemChanged(set);
-                        }
-                        holder.progressView.setProgress(progress);
-                        holder.progressView.setDuration(duration);
-
+                        holder.info.setStatus(1);
                     }
+                    adapter.notifyItemChanged(set);
                     return;
                 }
             }
@@ -601,7 +598,6 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
                     MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
                     if(info.getNetId()==id){
                         info.setStatus(2);
-                        //adapter.notifyItemChanged(i);
                         break;
                     }
                 }

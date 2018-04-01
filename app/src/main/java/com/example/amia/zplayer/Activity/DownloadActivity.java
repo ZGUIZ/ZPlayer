@@ -131,17 +131,23 @@ public class DownloadActivity extends MusicListActivity {
             for(DownloadAdapter.Holder holder:holderList){
                 if(holder.info.getNetId()==id){
                     if(progress==duration){
-                        //Log.i("DownLoadRec","equal");
-                        holder.progress=progress;
-                        holder.duration=duration;
+//                        holder.progress=progress;
+//                        holder.duration=duration;
+                        holder.progressView.setProgress(progress);
+                        holder.progressView.setDuration(duration);
                         holder.info.setStatus(2);
                         adapterDataSetChanged();
                         return;
                     }
-                    holder.info.setStatus(1);
-                    holder.progress=progress;
-                    holder.duration=duration;
-                    adapterDataSetChanged();
+                    if(holder.info.getStatus()!=1) {
+                        holder.info.setStatus(1);
+                        adapterDataSetChanged();
+                    }
+//                    holder.progress=progress;
+//                    holder.duration=duration;
+//                    adapterDataSetChanged();
+                    holder.progressView.setDuration(duration);
+                    holder.progressView.setProgress(progress);
                     return;
                 }
             }
