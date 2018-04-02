@@ -243,6 +243,15 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                     continuePlayMusic();
                 }
                 break;
+            case R.id.love_ib:
+                //判断是否在列表中
+                if(currentMp3Info!=null&&currentMp3Info.isInLove()){
+                    removeFromLove();
+                }
+                else {
+                    addToLove();
+                }
+                break;
             case R.id.con_bar:
                 //打开播放界面
                 super.startActivity(PlayingActivity.class);
@@ -267,15 +276,6 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                 break;
             case R.id.all_cancel:
                 cancelAll();
-                break;
-            case R.id.love_ib:
-                //判断是否在列表中
-                if(currentMp3Info!=null&&currentMp3Info.isInLove()){
-                    removeFromLove();
-                }
-                else {
-                    addToLove();
-                }
                 break;
             case R.id.search_ib:
                 //startActivity(SearchActivity.class,getResources().getString(R.string.LIST_ID),new Integer(list_id));
@@ -558,7 +558,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         }
         int love_id=musicListDao.getList_id("我喜欢");
         boolean inlist=musicOfListDao.isInList(love_id,(int)currentMp3Info.getId());
-        love_ib.setClickable(false);
+        love_ib.setClickable(true);
         if(inlist){
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.loved,null));
             currentMp3Info.setInLove(true);

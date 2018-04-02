@@ -286,7 +286,7 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             Toast.makeText(this,"无播放的音乐！",Toast.LENGTH_SHORT).show();
             return;
         }
-
+        currentMp3Info.setInLove(true);
         MusicListAcitvityUtils.addSingleMusicToList(musicOfListDao,musicListDao.getList_id("我喜欢"),(int)currentMp3Info.getId());
         love_ib.setImageDrawable(getResources().getDrawable(R.drawable.loved,null));
     }
@@ -370,9 +370,6 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             case R.id.list_button:
                 pager.setCurrentItem(1);
                 break;
-            case R.id.music_title:
-            case R.id.music_artist:
-            case R.id.music_album:
             case R.id.con_bar:
                 //打开播放界面
                 super.startActivity(PlayingActivity.class);

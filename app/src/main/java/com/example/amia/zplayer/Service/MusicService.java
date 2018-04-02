@@ -10,15 +10,19 @@ import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
 import com.example.amia.zplayer.DTO.Mp3Info;
+import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 import com.example.amia.zplayer.MusicPlayStatus;
+import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.EarringPutOutReceiver;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PhoneCallListener;
+import com.example.amia.zplayer.util.RandomIdUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -151,7 +155,51 @@ public class MusicService extends Service {
         }
         curretnMp3Info=mp3Info;
         String url=curretnMp3Info.getUrl();
-        playMusic(url);
+        if(mp3Info instanceof MusicDownLoadInfo){
+            playNetMusic((MusicDownLoadInfo)mp3Info);
+        }
+        else {
+            playMusic(url);
+        }
+    }
+
+    private void playNetMusic(MusicDownLoadInfo info){
+        isPlaying=true;
+        sendMp3Info();
+        try{
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.pause();
+                mediaPlayer.seekTo(mediaPlayer.getDuration()-100);
+                mediaPlayer.stop();
+                isPlaying=false;
+            }
+            mediaPlayer.reset();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setDataSource("http://"+getResources().getString(R.string.down_host)+info.getNetUrl());
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    isPlaying=true;
+                    mediaPlayer.start();
+                    curretnMp3Info.setDuration(mediaPlayer.getDuration());
+                    sendMp3Info();
+                    sentCurrentTime();
+                }
+            });
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            Toast.makeText(this,"网络异常！",Toast.LENGTH_SHORT).show();
+            playNetMusic(info);
+        }
+    }
+
+    private void sendMp3Info(){
+        Intent intent=new Intent();
+        intent.setAction(tranTarget);
+        intent.putExtra("mp3Info",curretnMp3Info);
+        sendBroadcast(intent);
     }
 
     private void setPlayStatus(MusicPlayStatus status){
@@ -278,6 +326,11 @@ public class MusicService extends Service {
     }
 
     private void addToNext(Mp3Info mp3Info){
+        if(mp3Info instanceof MusicDownLoadInfo){
+            if(mp3Info.getId()==0||mp3Info.getId()==-1){
+                mp3Info.setId(RandomIdUtil.getRandomId(musiclist));
+            }
+        }
         if(musiclist!=null&&musiclist.size()!=0){
             if(curretnMp3Info!=null){
                 int position=musiclist.indexOf(curretnMp3Info);
@@ -318,6 +371,10 @@ public class MusicService extends Service {
 
     private void setCurrentPosition(int currentPosition){
         mediaPlayer.seekTo(currentPosition);
+    }
+
+    private int getMusicLength(){
+        return mediaPlayer.getDuration();
     }
 
     class MusicPlayMangerEntity extends Binder implements MusicPlayManager {
@@ -415,6 +472,10 @@ public class MusicService extends Service {
         @Override
         public void subConnection() {
             MusicService.this.subConnection();
+        }
+
+        public int getMusicLength() {
+            return MusicService.this.getMusicLength();
         }
 
     }
