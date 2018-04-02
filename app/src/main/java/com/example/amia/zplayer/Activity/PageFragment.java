@@ -439,9 +439,8 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                         msg.setData(bundle);
                         bitmapHandler.sendMessage(msg);
                     }
-                    catch (IOException e){
+                    catch (Exception e){
                         e.printStackTrace();
-                        Toast.makeText(activity,"网络异常，无法加载图片",Toast.LENGTH_SHORT).show();
                     }
                 }
             }).start();

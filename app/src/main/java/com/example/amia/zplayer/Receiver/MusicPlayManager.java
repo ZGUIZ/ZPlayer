@@ -120,4 +120,10 @@ public interface MusicPlayManager{
      * 断开连接计数
      */
     void subConnection();
+
+    /**
+     * 获取当前音乐的长度
+     * @return
+     */
+    //int getMusicLength();
 }

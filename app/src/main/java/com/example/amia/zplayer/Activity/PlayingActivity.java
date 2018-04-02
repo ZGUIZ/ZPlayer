@@ -35,6 +35,7 @@ import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
 import com.example.amia.zplayer.DTO.LrcEntity;
 import com.example.amia.zplayer.DTO.Mp3Info;
+import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 import com.example.amia.zplayer.MusicPlayStatus;
 import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.CurrentPositionReceiver;
@@ -215,6 +216,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     //播放音乐
     private void play(int position){
         Mp3Info mp3Info=musList.get(position);
+        //setCurrentMusicInfo(mp3Info);
         process_seekbar.setMax((int)mp3Info.getDuration());
         process_seekbar.setProgress(0);
         musicPlayManager.playMusic(musList,position);
@@ -373,6 +375,11 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     }
 
     private void setLoveButtonIcon(){
+        if(currentMp3Info instanceof MusicDownLoadInfo){
+            love_ib.setClickable(false);
+            return;
+        }
+        love_ib.setClickable(true);
         if(currentMp3Info.isInLove()){
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.loved,null));
         }

@@ -32,6 +32,7 @@ import com.example.amia.zplayer.ControlUtil.MusicListAcitvityUtils;
 import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
 import com.example.amia.zplayer.DTO.Mp3Info;
+import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 import com.example.amia.zplayer.DTO.MusicList;
 import com.example.amia.zplayer.DTO.MusicOfList;
 import com.example.amia.zplayer.R;
@@ -548,13 +549,16 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         }
         artist_tv.setText(info.getArtist());
         title_tv.setText(info.getTitle());
-        progressBar.setMax((int)info.getDuration());
+        int length= (int) info.getDuration();
+        progressBar.setMax(length);
+        //progressBar.setMax((int)info.getDuration());
         setPausebuttonIcon();
         if(musListAdapter!=null&&musListAdapter.getCount()>0) {
             musListAdapter.notifyDataSetChanged();
         }
         int love_id=musicListDao.getList_id("我喜欢");
         boolean inlist=musicOfListDao.isInList(love_id,(int)currentMp3Info.getId());
+        love_ib.setClickable(false);
         if(inlist){
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.loved,null));
             currentMp3Info.setInLove(true);
@@ -562,6 +566,9 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         else{
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.love,null));
             currentMp3Info.setInLove(false);
+            if(currentMp3Info instanceof MusicDownLoadInfo){
+                love_ib.setClickable(false);
+            }
         }
     }
 

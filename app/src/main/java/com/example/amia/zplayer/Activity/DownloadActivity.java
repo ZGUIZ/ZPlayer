@@ -131,8 +131,6 @@ public class DownloadActivity extends MusicListActivity {
             for(DownloadAdapter.Holder holder:holderList){
                 if(holder.info.getNetId()==id){
                     if(progress==duration){
-//                        holder.progress=progress;
-//                        holder.duration=duration;
                         holder.progressView.setProgress(progress);
                         holder.progressView.setDuration(duration);
                         holder.info.setStatus(2);
@@ -143,9 +141,6 @@ public class DownloadActivity extends MusicListActivity {
                         holder.info.setStatus(1);
                         adapterDataSetChanged();
                     }
-//                    holder.progress=progress;
-//                    holder.duration=duration;
-//                    adapterDataSetChanged();
                     holder.progressView.setDuration(duration);
                     holder.progressView.setProgress(progress);
                     return;

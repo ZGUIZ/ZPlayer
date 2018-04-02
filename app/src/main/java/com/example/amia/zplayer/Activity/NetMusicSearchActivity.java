@@ -1,8 +1,12 @@
 package com.example.amia.zplayer.Activity;
 
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
@@ -23,9 +27,12 @@ import android.widget.Toast;
 
 import com.example.amia.zplayer.ControlUtil.SearchMusicJson;
 import com.example.amia.zplayer.DAO.DownloadDao;
+import com.example.amia.zplayer.DTO.Mp3Info;
 import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
 import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.DownloadProgReceiver;
+import com.example.amia.zplayer.Receiver.MusicPlayManager;
+import com.example.amia.zplayer.Service.MusicService;
 import com.example.amia.zplayer.View.ProgressView;
 import com.example.amia.zplayer.util.DownloadUtil;
 import com.example.amia.zplayer.util.JsonResolveUtils;
@@ -35,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class NetMusicSearchActivity extends AppCompatActivity implements View.OnClickListener{
+public class NetMusicSearchActivity extends MusicAboutActivity implements View.OnClickListener{
 
     final static int SETLISTMESSAGE=0;
 
@@ -55,6 +62,8 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
     private ProgressBar progressBar;  //歌曲搜索进度条
     private DownloadDao downloadDao;
 
+    private static MusicServiceConnection musicServiceConnection;   //服务连接器
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +71,14 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
         pool=Executors.newSingleThreadExecutor();
         downloadDao=new DownloadDao(this);
         init();
+        onBindMusicService();
+    }
+
+    //绑定服务
+    private void onBindMusicService(){
+        musicServiceConnection=new MusicServiceConnection();
+        Intent intent=new Intent(this, MusicService.class);
+        bindService(intent,musicServiceConnection,BIND_AUTO_CREATE);
     }
 
     protected void init(){
@@ -147,6 +164,7 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
     protected void onDestroy(){
         pool.shutdown();  //关闭线程池
         manager.unregisterReceiver(downLoadReceiver);
+        unbindService(musicServiceConnection);
         super.onDestroy();
     }
 
@@ -178,6 +196,24 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
         if(resInfo==null||resInfo.isEmpty()){
             Toast.makeText(this,"没有找到对应的结果！",Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void tryListen(Holder holder){
+        musicPlayManager.addToNext(holder.info);
+        musicPlayManager.playMusic(holder.info);
+        setCurrentMusicInfo(holder.info);
+    }
+
+    @Override
+    void PauseMusic() {
+    }
+
+    @Override
+    public void PauseMusicFromService() {
+    }
+
+    @Override
+    public void setCurrentMusicInfo(Mp3Info info) {
     }
 
     class NetMusicAdapter extends BaseAdapter{
@@ -274,7 +310,7 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.try_listen_ib:
-
+                    tryListen(holder);
                     break;
                 case R.id.download_ib:
                     download(i,holder);
@@ -318,4 +354,15 @@ public class NetMusicSearchActivity extends AppCompatActivity implements View.On
         }
     }
 
+    private class MusicServiceConnection implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            musicPlayManager=(MusicPlayManager)iBinder;
+            isplay=musicPlayManager.isPlaying();
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+        }
+    }
 }

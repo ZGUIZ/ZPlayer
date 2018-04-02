@@ -123,14 +123,8 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
 
         waitProgress=findViewById(R.id.wait_progress);
         adapter=new NetMusicAdapter();
-        /*
-        ListView listView=findViewById(R.id.net_music_list);
-        listView.setDivider(null);
-        listView.setAdapter(adapter);
 
-        ((TextView)findViewById(R.id.net_list_name)).setText(classify.getName());
-        setToolBar();
-        */
+        //设置RecyclerView
         RecyclerView recyclerView=findViewById(R.id.net_list_rv);
         GridLayoutManager manager=new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(manager);
@@ -138,11 +132,15 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         adapter=new NetMusicAdapter();
         recyclerView.setAdapter(adapter);
         ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
         CollapsingToolbarLayout toolbarLayout=findViewById(R.id.collapsing_toolbar);
         toolbarLayout.setTitleEnabled(true);
         toolbarLayout.setTitle(classify.getName());
+
+        //设置显示的图片
         ImageView imageView=findViewById(R.id.list_icon_iv);
         byte[] bitmapByte=intent.getByteArrayExtra("bitmap");
+        //获取屏幕高度
         WindowInfoMananger wim=new WindowInfoMananger(this);
         Point point=wim.getScreenWidthHight();
         Bitmap bitmap=BitMapUtil.getOrderSizeBitmap(BitmapFactory.decodeByteArray(bitmapByte,0,bitmapByte.length),point.x,point.x);
@@ -329,7 +327,10 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         }
         artist_tv.setText(info.getArtist());
         title_tv.setText(info.getTitle());
-        progressBar.setMax((int)info.getDuration());
+        //设置音乐长度
+        int length= (int) info.getDuration();
+        progressBar.setMax(length);
+
         if(isplay){
             pausebutton.setImageDrawable(getResources().getDrawable(R.drawable.pause,null));
         }
@@ -339,6 +340,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
 
         int love_id=musicListDao.getList_id("我喜欢");
         boolean inlist=musicOfListDao.isInList(love_id,(int)currentMp3Info.getId());
+        love_ib.setClickable(true);
         if(inlist){
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.loved,null));
             currentMp3Info.setInLove(true);
@@ -346,6 +348,9 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         else{
             love_ib.setImageDrawable(getResources().getDrawable(R.drawable.love,null));
             currentMp3Info.setInLove(false);
+            if(currentMp3Info instanceof MusicDownLoadInfo){
+                love_ib.setClickable(false);
+            }
         }
     }
 
@@ -456,6 +461,10 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         }
     }
 
+    /**
+     * 下载歌曲
+     * @param holder
+     */
     protected void download(int i,final Holder holder){
         final MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
         if(downloadDao.isInList(info.getNetId())){
@@ -479,10 +488,17 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         }
     }
 
+
     private void download(Holder holder){
         DownloadUtil util=new DownloadUtil(this);
         util.downLoadMusic(holder.info);
         SearchMusicJson.addToDownDatabase(this,holder.info);
+    }
+
+    private void tryListen(Holder holder){
+        musicPlayManager.addToNext(holder.info);
+        musicPlayManager.playMusic(holder.info);
+        //setCurrentMusicInfo(holder.info);
     }
 
     class NetMusicAdapter extends RecyclerView.Adapter<Holder>{
@@ -563,7 +579,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.try_listen_ib:
-
+                    tryListen(holder);
                     break;
                 case R.id.download_ib:
                     download(i,holder);
