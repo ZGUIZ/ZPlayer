@@ -1,5 +1,8 @@
 package com.example.amia.zplayer.util;
 
+import com.example.amia.zplayer.DTO.Mp3Info;
+import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
+
 import java.text.DecimalFormat;
 
 /**
@@ -7,6 +10,7 @@ import java.text.DecimalFormat;
  */
 
 public class ChangelateUtil {
+
     public static String calTime(long time){
         long second=time/1000;
         long min=second/60;
