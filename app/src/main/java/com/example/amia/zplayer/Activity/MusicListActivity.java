@@ -619,7 +619,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         super.onActivityResult(requestCode,resultCode,data);
     }
 
-    private void cancel_LongPress(){
+    protected void cancel_LongPress(){
         //backButton.setVisibility(View.VISIBLE);
         bottom_layout.setVisibility(View.VISIBLE);
         list_title.setVisibility(View.VISIBLE);

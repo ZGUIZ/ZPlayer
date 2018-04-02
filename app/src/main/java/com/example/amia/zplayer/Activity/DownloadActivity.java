@@ -109,6 +109,16 @@ public class DownloadActivity extends MusicListActivity {
         }
     }
 
+    @Override
+    protected void cancel_LongPress(){
+        try {
+            super.cancel_LongPress();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     protected void adapterDataSetChanged() {
         adapter.notifyDataSetChanged();
     }

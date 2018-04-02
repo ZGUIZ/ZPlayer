@@ -17,11 +17,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -130,15 +132,15 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
         });
     }
 
-    protected void download(int i,final Holder holder){
-        final MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
+    protected void download(final Holder holder){
+        final MusicDownLoadInfo info=holder.info;
         if(downloadDao.isInList(info.getNetId())){
             AlertDialog alertDialog=new AlertDialog.Builder(this).setTitle("确认下载？").setMessage("你的下载列表中已经存在该音乐，是否继续或重新下载？").create();
             alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     downloadDao.delete(info);
-                    download(holder);
+                    download(info);
                 }
             });
             alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
@@ -149,15 +151,15 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             alertDialog.show();
         }
         else {
-            download(holder);
+            download(info);
         }
     }
 
-    private void download(Holder holder){
+    private void download(MusicDownLoadInfo info){
         DownloadUtil util=new DownloadUtil(this);
-        util.downLoadMusic(holder.info);
-        holder.info.setStatus(1);
-        SearchMusicJson.addToDownDatabase(this,holder.info);
+        util.downLoadMusic(info);
+        info.setStatus(1);
+        SearchMusicJson.addToDownDatabase(this,info);
     }
 
     @Override
@@ -202,6 +204,7 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
         musicPlayManager.addToNext(holder.info);
         musicPlayManager.playMusic(holder.info);
         setCurrentMusicInfo(holder.info);
+        super.startActivity(PlayingActivity.class);
     }
 
     @Override
@@ -239,22 +242,22 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             if(view==null){
                 view=View.inflate(NetMusicSearchActivity.this,R.layout.net_item_layout,null);
                 holder=new Holder();
+                holder.listen=view.findViewById(R.id.net_item_rl);
                 holder.title=view.findViewById(R.id.net_title_tv);
                 holder.artist=view.findViewById(R.id.net_artist_tv);
-                holder.listen=view.findViewById(R.id.try_listen_ib);
                 holder.download=view.findViewById(R.id.download_ib);
                 holder.progressView=view.findViewById(R.id.down_progress);
-                ListItemClickListener listener=new ListItemClickListener();
-                holder.listener=listener;
-                holder.listen.setOnClickListener(listener);
-                holder.download.setOnClickListener(listener);
+               // ListItemClickListener listener=new ListItemClickListener();
+                //holder.listener=listener;
+                holder.listen.setOnClickListener(holder);
+                holder.download.setOnClickListener(holder);
                 view.setTag(holder);
                 holderList.add(holder);
             }
             else{
                 holder=(Holder) view.getTag();
             }
-            holder.listener.setInfo(i,holder);
+            //holder.listener.setInfo(i,holder);
             MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
             holder.net_id=info.getNetId();
             holder.title.setText(info.getTitle());
@@ -286,19 +289,31 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
         }
     }
 
-    class Holder{
+    class Holder implements View.OnClickListener{
         int net_id;
         TextView title;
         TextView artist;
-        ImageButton listen;
+        RelativeLayout listen;
         ImageButton download;
         ProgressView progressView;
-        ListItemClickListener listener;
+        //ListItemClickListener listener;
         long progress;
         long duration;
         MusicDownLoadInfo info;
-    }
 
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.net_item_rl:
+                    tryListen(this);
+                    break;
+                case R.id.download_ib:
+                    download(this);
+                    break;
+            }
+        }
+    }
+/*
     class ListItemClickListener implements View.OnClickListener{
         private int i;
         private Holder holder;
@@ -309,8 +324,9 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
         @Override
         public void onClick(View view) {
             switch (view.getId()){
-                case R.id.try_listen_ib:
+                case R.id.net_item_rl:
                     tryListen(holder);
+                    Log.i("onClick","tryListen");
                     break;
                 case R.id.download_ib:
                     download(i,holder);
@@ -318,7 +334,7 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             }
         }
     }
-
+*/
     class DownLoadReceiver extends DownloadProgReceiver{
 
         @Override

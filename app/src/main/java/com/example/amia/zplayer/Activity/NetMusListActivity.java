@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -463,17 +464,27 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
 
     /**
      * 下载歌曲
-     * @param holder
+     * @param info
      */
-    protected void download(int i,final Holder holder){
-        final MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
+    private void download(MusicDownLoadInfo info){
+        DownloadUtil util=new DownloadUtil(this);
+        util.downLoadMusic(info);
+        SearchMusicJson.addToDownDatabase(this,info);
+    }
+
+
+    /**
+     * 下载歌曲
+     */
+    protected void download(final Holder holder){
+        final MusicDownLoadInfo info=holder.info;
         if(downloadDao.isInList(info.getNetId())){
             AlertDialog alertDialog=new AlertDialog.Builder(this).setTitle("确认下载？").setMessage("你的下载列表中已经存在该音乐，是否继续或重新下载？").create();
             alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     downloadDao.delete(info);
-                    download(holder);
+                    download(holder.info);
                 }
             });
             alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
@@ -484,31 +495,19 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             alertDialog.show();
         }
         else {
-            download(holder);
+           download(info);
         }
-    }
-
-
-    private void download(Holder holder){
-        DownloadUtil util=new DownloadUtil(this);
-        util.downLoadMusic(holder.info);
-        SearchMusicJson.addToDownDatabase(this,holder.info);
     }
 
     private void tryListen(Holder holder){
         musicPlayManager.addToNext(holder.info);
         musicPlayManager.playMusic(holder.info);
-        //setCurrentMusicInfo(holder.info);
     }
 
     class NetMusicAdapter extends RecyclerView.Adapter<Holder>{
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
             Holder holder=new Holder(LayoutInflater.from(NetMusListActivity.this).inflate(R.layout.net_item_layout,null));
-            ListItemClickListener listener=new ListItemClickListener();
-            holder.listener=listener;
-            holder.listen.setOnClickListener(listener);
-            holder.download.setOnClickListener(listener);
             holderList.add(holder);
             return holder;
         }
@@ -519,8 +518,6 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             holder.net_id=info.getNetId();
             holder.title.setText(info.getTitle());
             holder.artist.setText(info.getArtist());
-            //holder.listener.i=position;
-            holder.listener.setInfo(position,holder);
             holder.info= info;
             switch (holder.info.getStatus()){
                 case 0:
@@ -549,40 +546,33 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
 
     }
 
-    class Holder extends RecyclerView.ViewHolder{
+    class Holder extends RecyclerView.ViewHolder implements View.OnClickListener{
         int net_id;
         TextView title;
         TextView artist;
-        ImageButton listen;
+        RelativeLayout listen_lr;
         ImageButton download;
         ProgressView progressView;
-        ListItemClickListener listener;
         MusicDownLoadInfo info;
         public Holder(View itemView) {
             super(itemView);
             title=itemView.findViewById(R.id.net_title_tv);
             artist=itemView.findViewById(R.id.net_artist_tv);
-            listen=itemView.findViewById(R.id.try_listen_ib);
+            listen_lr=itemView.findViewById(R.id.net_item_rl);
+            listen_lr.setOnClickListener(this);
             download=itemView.findViewById(R.id.download_ib);
+            download.setOnClickListener(this);
             progressView=itemView.findViewById(R.id.down_progress);
         }
-    }
 
-    class ListItemClickListener implements View.OnClickListener{
-        private int i;
-        private Holder holder;
-        public void setInfo(int i,Holder holder){
-            this.i=i;
-            this.holder=holder;
-        }
         @Override
         public void onClick(View view) {
             switch (view.getId()){
-                case R.id.try_listen_ib:
-                    tryListen(holder);
-                    break;
                 case R.id.download_ib:
-                    download(i,holder);
+                    download(this);
+                    break;
+                case R.id.net_item_rl:
+                    tryListen(this);
                     break;
             }
         }

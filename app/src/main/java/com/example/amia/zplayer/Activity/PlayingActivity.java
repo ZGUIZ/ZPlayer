@@ -615,6 +615,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
             if(lrcList!=null&&lrcList.size()>0) {
                 setLrc(currentPosition);
             }
+            if(isplay==false){
+                isplay=true;
+                setPauseButtonIcon();
+            }
         }
     }
 

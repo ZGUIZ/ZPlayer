@@ -370,6 +370,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             case R.id.list_button:
                 pager.setCurrentItem(1);
                 break;
+            case R.id.music_title:
+            case R.id.music_artist:
+            case R.id.music_album:
             case R.id.con_bar:
                 //打开播放界面
                 super.startActivity(PlayingActivity.class);
