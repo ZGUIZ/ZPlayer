@@ -107,7 +107,7 @@ public class MusicService extends Service {
     }
 
     private void addConnection(){
-        if(connCount<=0){
+        if(connCount<=0&&isPlaying){
             sentCurrentTime();
         }
         connCount++;
@@ -227,6 +227,7 @@ public class MusicService extends Service {
             mediaPlayer.start();
             isPlaying=true;
             sentCurrentTime();
+            addToPlayedDatabase();  //添加到数据库
         }
         catch (IOException e){
             e.printStackTrace();
@@ -235,10 +236,14 @@ public class MusicService extends Service {
             e.printStackTrace();
             playMusic(url);
         }
-
     }
 
     private void sentCurrentTime(){
+        //没有播放的时候没有必要发送广播
+        if(!isPlaying){
+            return;
+        }
+
         executorService.submit(new Runnable() {
             private Intent intent=new Intent();
             @Override
@@ -260,31 +265,6 @@ public class MusicService extends Service {
                 }
             }
         });
-    }
-
-    @Deprecated
-    private void sentCrrentTime(){
-        new Thread(new Runnable() {
-            private Intent intent=new Intent();
-            @Override
-            public void run() {
-                intent.setAction(currentPositionActionName);
-                int time=0;
-                int duration=mediaPlayer.getDuration();
-                while(isPlaying()&&(duration-time)>500/*&&isScreenOn*/&&connCount>0){
-                    time=mediaPlayer.getCurrentPosition();
-                    //Log.i("Service","time="+time);
-                    intent.removeExtra(currentPositionKey);
-                    intent.putExtra(currentPositionKey,time);
-                    sendBroadcast(intent);
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
     }
 
     public void pauseMusic(){
@@ -529,7 +509,6 @@ public class MusicService extends Service {
             intent.setAction(tranTarget);
             intent.putExtra("mp3Info",curretnMp3Info);
             sendBroadcast(intent);
-            addToPlayedDatabase();
         }
     }
 
