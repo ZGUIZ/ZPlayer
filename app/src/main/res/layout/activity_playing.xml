@@ -103,5 +103,6 @@
     </LinearLayout>
 
     <include layout="@layout/half_musiclist_layout" />
+    <include layout="@layout/playing_other_layout"/>
 
 </RelativeLayout>

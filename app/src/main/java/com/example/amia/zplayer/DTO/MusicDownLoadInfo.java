@@ -1,5 +1,7 @@
 package com.example.amia.zplayer.DTO;
 
+import java.util.List;
+
 /**
  * Created by Amia on 2018/3/4.
  */
@@ -62,5 +64,17 @@ public class MusicDownLoadInfo extends Mp3Info{
 
     public boolean equals(MusicDownLoadInfo musicDownLoadInfo){
         return netId==musicDownLoadInfo.getNetId();
+    }
+
+    public static int isInList(MusicDownLoadInfo info, List<Mp3Info> lists){
+        for(int i=0;i<lists.size();i++){
+            Mp3Info mp3Info=lists.get(i);
+            if(mp3Info instanceof MusicDownLoadInfo){
+                if(((MusicDownLoadInfo)mp3Info).getNetId()==info.getNetId()){
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }

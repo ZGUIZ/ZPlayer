@@ -149,7 +149,7 @@ public class DownloadUtil {
 
             @Override
             public void onFinished() {
-                if(type.equals(LRC)||context instanceof PlayingActivity){
+                if(type.equals(LRC)&&context instanceof PlayingActivity){
                     ((PlayingActivity)context).setFirstLrc(downInfo);
                 }
                 if(type.equals(MUSIC)){

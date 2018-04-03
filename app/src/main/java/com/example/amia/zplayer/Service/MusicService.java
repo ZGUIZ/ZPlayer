@@ -168,10 +168,10 @@ public class MusicService extends Service {
         sendMp3Info();
         try{
             if(mediaPlayer.isPlaying()){
+                isPlaying=false;
                 mediaPlayer.pause();
                 mediaPlayer.seekTo(mediaPlayer.getDuration()-100);
                 mediaPlayer.stop();
-                isPlaying=false;
             }
             mediaPlayer.reset();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -215,10 +215,10 @@ public class MusicService extends Service {
             File file=new File(url);
             //让广播进度的线程停止
             if(mediaPlayer.isPlaying()){
+                isPlaying=false;
                 mediaPlayer.pause();
                 mediaPlayer.seekTo(mediaPlayer.getDuration()-100);
                 mediaPlayer.stop();
-                isPlaying=false;
             }
             mediaPlayer.reset();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -250,7 +250,7 @@ public class MusicService extends Service {
             public void run() {
                 intent.setAction(currentPositionActionName);
                 int time=0;
-                int duration=mediaPlayer.getDuration();
+                int duration=(int)curretnMp3Info.getDuration();
                 while(isPlaying()&&(duration-time)>500&&connCount>0){
                     time=mediaPlayer.getCurrentPosition();
                     //Log.i("Service","time="+time);
@@ -307,6 +307,10 @@ public class MusicService extends Service {
 
     private void addToNext(Mp3Info mp3Info){
         if(mp3Info instanceof MusicDownLoadInfo){
+            int set=MusicDownLoadInfo.isInList((MusicDownLoadInfo) mp3Info,musiclist);
+            if(set!=-1){
+                musiclist.remove(set);
+            }
             if(mp3Info.getId()==0||mp3Info.getId()==-1){
                 mp3Info.setId(RandomIdUtil.getRandomId(musiclist));
             }
@@ -354,6 +358,12 @@ public class MusicService extends Service {
     }
 
     private int getMusicLength(){
+        if(!isPlaying&&curretnMp3Info!=null){
+            return (int)curretnMp3Info.getDuration();
+        }
+        if(!isPlaying){
+            return 0;
+        }
         return mediaPlayer.getDuration();
     }
 

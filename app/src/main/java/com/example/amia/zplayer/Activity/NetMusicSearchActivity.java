@@ -247,8 +247,6 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
                 holder.artist=view.findViewById(R.id.net_artist_tv);
                 holder.download=view.findViewById(R.id.download_ib);
                 holder.progressView=view.findViewById(R.id.down_progress);
-               // ListItemClickListener listener=new ListItemClickListener();
-                //holder.listener=listener;
                 holder.listen.setOnClickListener(holder);
                 holder.download.setOnClickListener(holder);
                 view.setTag(holder);
@@ -257,7 +255,6 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             else{
                 holder=(Holder) view.getTag();
             }
-            //holder.listener.setInfo(i,holder);
             MusicDownLoadInfo info=(MusicDownLoadInfo)resInfo.get(i);
             holder.net_id=info.getNetId();
             holder.title.setText(info.getTitle());
@@ -296,7 +293,6 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
         RelativeLayout listen;
         ImageButton download;
         ProgressView progressView;
-        //ListItemClickListener listener;
         long progress;
         long duration;
         MusicDownLoadInfo info;
@@ -313,28 +309,7 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             }
         }
     }
-/*
-    class ListItemClickListener implements View.OnClickListener{
-        private int i;
-        private Holder holder;
-        public void setInfo(int i,Holder holder){
-            this.i=i;
-            this.holder=holder;
-        }
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()){
-                case R.id.net_item_rl:
-                    tryListen(holder);
-                    Log.i("onClick","tryListen");
-                    break;
-                case R.id.download_ib:
-                    download(i,holder);
-                    break;
-            }
-        }
-    }
-*/
+
     class DownLoadReceiver extends DownloadProgReceiver{
 
         @Override

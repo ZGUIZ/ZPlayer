@@ -169,20 +169,6 @@ public class MusicListAcitvityUtils {
         context.startActivity(Intent.createChooser(intent,"分享到"));
     }
 
-    private static void shareMusic(Context context,Mp3Info mp3Info){
-        //Bitmap bitmap=bitMap.get(String.valueOf(mp3Info.getId()));
-        File file=new File(mp3Info.getUrl());
-
-        if(file.exists()) {
-            Intent musicIntent = new Intent(Intent.ACTION_SEND);
-            musicIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-            musicIntent.putExtra(Intent.EXTRA_SUBJECT, "Share");
-            //Log.i("MainActivity", "Path=" + file.getAbsolutePath());
-            musicIntent.setType("*/*");
-            context.startActivity(Intent.createChooser(musicIntent, "分享到"));
-        }
-    }
-
     public static int findFromList(Mp3Info mp3Info,List<Mp3Info> mp3Infos){
         return findFromList((int)mp3Info.getId(),mp3Infos);
     }

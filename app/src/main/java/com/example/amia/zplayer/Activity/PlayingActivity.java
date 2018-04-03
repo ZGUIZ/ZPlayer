@@ -2,6 +2,7 @@ package com.example.amia.zplayer.Activity;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -13,6 +14,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -22,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -29,13 +33,17 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.amia.zplayer.ControlUtil.AddToListListener;
 import com.example.amia.zplayer.ControlUtil.MusicListAcitvityUtils;
 import com.example.amia.zplayer.ControlUtil.PlayingActivityUtil;
+import com.example.amia.zplayer.ControlUtil.SearchMusicJson;
+import com.example.amia.zplayer.DAO.DownloadDao;
 import com.example.amia.zplayer.DAO.MusicListDao;
 import com.example.amia.zplayer.DAO.MusicOfListDao;
 import com.example.amia.zplayer.DTO.LrcEntity;
 import com.example.amia.zplayer.DTO.Mp3Info;
 import com.example.amia.zplayer.DTO.MusicDownLoadInfo;
+import com.example.amia.zplayer.DTO.MusicList;
 import com.example.amia.zplayer.MusicPlayStatus;
 import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.CurrentPositionReceiver;
@@ -44,6 +52,7 @@ import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PauseMusicReceiver;
 import com.example.amia.zplayer.Service.MusicService;
 import com.example.amia.zplayer.util.ChangelateUtil;
+import com.example.amia.zplayer.util.DownloadUtil;
 import com.example.amia.zplayer.util.LrcResovler;
 import com.example.amia.zplayer.util.MusicResolverUtil;
 import com.example.amia.zplayer.util.WindowInfoMananger;
@@ -87,12 +96,13 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     private HalfMusAdapter musListAdapter;   //音乐列表适配器
     private RelativeLayout half_muslist_rl;  //音乐列表整个布局
     private RelativeLayout half_lsit_area;   //音乐列表区域布局
+    private RelativeLayout otherLayout;      //其他操作的整个布局
+    private LinearLayout other_ll;           //其他操作的操作区
 
     private List<Mp3Info> musList;     //当前播放列表
     private List<LrcEntity> lrcList;   //歌词列表
     private List<Map<String,Object>> lrcObject=new ArrayList<>();   //歌词适配SimpleAdapter转换的List
     private int curlrc;     //当前歌词所在位置
-    //private boolean isDrag;  //是否被拖动
     ExecutorService lrcDragThreadPool;   //lrc拖动线程池
 
     private static WindowInfoMananger wim;
@@ -110,7 +120,6 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         startService(intent);
         init();
         lrcDragThreadPool = Executors.newCachedThreadPool();
-        //setWindowColor();
     }
 
     //首次加载音乐信息
@@ -173,6 +182,12 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         half_muslist_rl.setOnClickListener(this);
         half_lsit_area=findViewById(R.id.list_area_rl);
 
+        otherLayout=findViewById(R.id.other_layout);
+        otherLayout.setOnClickListener(this);
+        otherLayout.setTag(false);
+        other_ll=findViewById(R.id.other_ll);
+        setotherInfo();
+
         process_seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -211,6 +226,14 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 resetLrc(musList.get(i));  //重置歌词
             }
         });
+    }
+
+    //设置其他列表
+    private void setotherInfo(){
+        findViewById(R.id.fixed_time_rl).setOnClickListener(this);
+        findViewById(R.id.down_rl).setOnClickListener(this);
+        findViewById(R.id.add_rl).setOnClickListener(this);
+        findViewById(R.id.share_rl).setOnClickListener(this);
     }
 
     //播放音乐
@@ -372,6 +395,8 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         }
         lrcAdapter.notifyDataSetChanged();
 
+        //设置下载按钮
+        setDownloadIcon();
     }
 
     private void setLoveButtonIcon(){
@@ -462,11 +487,91 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 }
                 break;
             case R.id.play_else:
-
+                PlayingActivityUtil.openOrCloseMusList(this,otherLayout,other_ll);
                 break;
             case R.id.half_mus_list_rl:
                 PlayingActivityUtil.closeMusicList(this,half_muslist_rl,half_lsit_area);
                 break;
+            case R.id.fixed_time_rl:
+
+                break;
+            case R.id.down_rl:
+                download();
+                break;
+            case R.id.add_rl:
+                addTo();
+                break;
+            case R.id.share_rl:
+                shareMusic();
+                break;
+            case R.id.other_layout:
+                PlayingActivityUtil.closeMusicList(this,otherLayout,other_ll);
+                break;
+        }
+    }
+
+    /**
+     * 下载
+     */
+    private void download(){
+        DownloadDao downloadDao=new DownloadDao(this);
+        if(!(currentMp3Info instanceof MusicDownLoadInfo)||downloadDao.isInList(((MusicDownLoadInfo)currentMp3Info).getNetId())){
+            Toast.makeText(this,"该音乐已经下载或者在下载队列！",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final MusicDownLoadInfo info=(MusicDownLoadInfo) currentMp3Info;
+        download(info);
+    }
+
+    private void download(MusicDownLoadInfo info){
+        DownloadUtil util=new DownloadUtil(this);
+        util.downLoadMusic(info);
+        info.setStatus(1);
+        SearchMusicJson.addToDownDatabase(this,info);
+        PlayingActivityUtil.closeMusicList(this,otherLayout,other_ll);
+    }
+
+    private void shareMusic(){
+        PlayingActivityUtil.closeMusicList(this,otherLayout,other_ll);
+        if(currentMp3Info instanceof MusicDownLoadInfo){
+            Toast.makeText(this,"暂时不支持网络音乐分享",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        PlayingActivityUtil.shareMusic(this,currentMp3Info);
+    }
+
+    private void addTo(){
+        if(currentMp3Info instanceof MusicDownLoadInfo){
+            return;
+        }
+        MusicListDao dao=new MusicListDao(this);
+        ArrayList<MusicList> lists=dao.queryAllList();
+        ArrayList<Mp3Info> musicList=new ArrayList<>();
+        musicList.add(currentMp3Info);
+        AddToListListener listener=new AddToListListener(this,musicList,lists){
+            @Override
+            protected void cancelSelect() {
+            }
+        };
+        AlertDialog.Builder builder=MusicListAcitvityUtils.createAddDialog(this,listener,lists);
+        builder.show();
+        PlayingActivityUtil.closeMusicList(this,otherLayout,other_ll);
+    }
+
+    /**
+     * 设置下载按钮
+     */
+    private void setDownloadIcon(){
+        DownloadDao downloadDao=new DownloadDao(this);
+        ImageView imageView=findViewById(R.id.down_load_iv);
+        //RelativeLayout layout=findViewById(R.id.down_rl);
+        if(currentMp3Info instanceof MusicDownLoadInfo &&((MusicDownLoadInfo)currentMp3Info).getStatus()==0&&!downloadDao.isInList(((MusicDownLoadInfo)currentMp3Info).getNetId())){
+            imageView.setImageResource(R.drawable.down_1);
+            //layout.setClickable(true);
+        }
+        else{
+            imageView.setImageResource(R.drawable.download_button);
+            //layout.setClickable(false);
         }
     }
 
@@ -558,6 +663,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     public void onBackPressed(){
         if((boolean)half_muslist_rl.getTag()){
             PlayingActivityUtil.openOrCloseMusList(this,half_muslist_rl,half_lsit_area);
+            return;
+        }
+        if((boolean)otherLayout.getTag()){
+            PlayingActivityUtil.openOrCloseMusList(this,otherLayout,other_ll);
             return;
         }
         super.onBackPressed();

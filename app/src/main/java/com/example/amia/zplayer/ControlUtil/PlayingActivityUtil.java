@@ -2,8 +2,10 @@ package com.example.amia.zplayer.ControlUtil;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -21,6 +23,7 @@ import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.util.BitMapUtil;
 import com.example.amia.zplayer.util.DownloadUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +35,12 @@ import java.util.Map;
 
 public class PlayingActivityUtil {
 
+    /**
+     * 设置专辑图片
+     * @param albumView
+     * @param bitmap
+     * @param point
+     */
     public static void setAlbumView(ImageView albumView, Bitmap bitmap,Point point){
         if(bitmap==null){
             albumView.setImageResource(R.drawable.defaluticon);
@@ -42,6 +51,30 @@ public class PlayingActivityUtil {
         albumView.setImageBitmap(resbitmap);
     }
 
+    /**
+     * 分享音乐
+     * @param context
+     * @param mp3Info
+     */
+    public static void shareMusic(Context context,Mp3Info mp3Info){
+        //Bitmap bitmap=bitMap.get(String.valueOf(mp3Info.getId()));
+        File file=new File(mp3Info.getUrl());
+
+        if(file.exists()) {
+            Intent musicIntent = new Intent(Intent.ACTION_SEND);
+            musicIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            musicIntent.putExtra(Intent.EXTRA_SUBJECT, "Share");
+            //Log.i("MainActivity", "Path=" + file.getAbsolutePath());
+            musicIntent.setType("*/*");
+            context.startActivity(Intent.createChooser(musicIntent, "分享到"));
+        }
+    }
+
+    /**
+     * 切换播放模式
+     * @param status
+     * @return
+     */
     public static MusicPlayStatus switchMode(MusicPlayStatus status){
         switch (status){
             case listloop:
@@ -60,18 +93,25 @@ public class PlayingActivityUtil {
         return status;
     }
 
+    /**
+     * 视图向下滑动退出
+     * @param context
+     * @param closeLayout
+     * @param view
+     */
     public static void closeMusicList(Context context, final View closeLayout, View view){
         Animation animation= AnimationUtils.loadAnimation(context,R.anim.push_buttom_out);
         view.startAnimation(animation);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                closeLayout.setClickable(false);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
                 closeLayout.setVisibility(View.GONE);
+                closeLayout.setTag(false);
             }
 
             @Override
@@ -81,12 +121,26 @@ public class PlayingActivityUtil {
         });
     }
 
+    /**
+     * 视图向上滑动进入
+     * @param context
+     * @param relativeLayout
+     * @param view
+     */
     public static void openMusiList(Context context,View relativeLayout,View view){
         relativeLayout.setVisibility(View.VISIBLE);
+        relativeLayout.setClickable(true);
         Animation animation=AnimationUtils.loadAnimation(context,R.anim.push_bottom_in);
         view.startAnimation(animation);
     }
 
+    /**
+     * 不确定进入或退出时使用该方法
+     * 注意该tag必须保存有是否已经显示的标志
+     * @param context
+     * @param half_muslist_rl
+     * @param half_lsit_area
+     */
     public static void openOrCloseMusList(Context context,View half_muslist_rl,View half_lsit_area){
         if(!(boolean)half_muslist_rl.getTag()){
             half_muslist_rl.setTag(true);
@@ -107,6 +161,13 @@ public class PlayingActivityUtil {
         lrc_list_view.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * 获取当前歌词位置
+     * @param curset
+     * @param lrc
+     * @param position
+     * @return
+     */
     public static int getCurlrcSet(int curset,List<LrcEntity> lrc,int position){
         //Log.i("getCurlrcSet","curset="+curset);
         if(curset<lrc.size()-1&&lrc.get(curset+1).getTime()<=position){
@@ -115,6 +176,17 @@ public class PlayingActivityUtil {
         return curset;
     }
 
+    /**
+     * 第一次尝试设置歌词
+     * 没找到歌词则从网络下载
+     * @param lrc
+     * @param lrcObject
+     * @param null_lrc
+     * @param lrc_list_view
+     * @param context
+     * @param trytime
+     * @param info
+     */
     public static void firstsetLrc(List<LrcEntity> lrc,List<Map<String,Object>> lrcObject, TextView null_lrc, ListView lrc_list_view,Context context,int trytime,Mp3Info info){
         if(lrc==null||lrc.size()==0){
             if(trytime==0) {
@@ -138,6 +210,13 @@ public class PlayingActivityUtil {
         //lrcAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * 第一次搜索歌词位置
+     * @param lrc
+     * @param time
+     * @param mp3Info
+     * @return
+     */
     //开始寻找位置
     public static int firstfindCurrentLrc(List<LrcEntity> lrc, int time, Mp3Info mp3Info){
         if(lrc==null||lrc.size()<=0){
