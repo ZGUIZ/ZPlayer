@@ -306,6 +306,9 @@ public class MusicService extends Service {
     }
 
     private void addToNext(Mp3Info mp3Info){
+        if(musiclist==null){
+            musiclist=new ArrayList<>();
+        }
         if(mp3Info instanceof MusicDownLoadInfo){
             int set=MusicDownLoadInfo.isInList((MusicDownLoadInfo) mp3Info,musiclist);
             if(set!=-1){
