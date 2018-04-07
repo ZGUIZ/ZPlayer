@@ -126,4 +126,10 @@ public interface MusicPlayManager{
      * @return
      */
     //int getMusicLength();
+
+    /**
+     * 删除音乐
+     * @param removeList
+     */
+    void removeMusic(List<Mp3Info> removeList);
 }

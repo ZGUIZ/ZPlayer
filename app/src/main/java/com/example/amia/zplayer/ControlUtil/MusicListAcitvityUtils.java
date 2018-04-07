@@ -114,7 +114,9 @@ public class MusicListAcitvityUtils {
         MusicOfListDao musicOfListDao=new MusicOfListDao(context);
         for(Mp3Info mp3Info:checkedMus){
             mp3Infos.remove(mp3Info);
-            musicOfListDao.deleteMusicOfList(list_id,(int)mp3Info.getId());
+            if(list_id!=-1) {
+                musicOfListDao.deleteMusicOfList(list_id, (int) mp3Info.getId());
+            }
         }
     }
 

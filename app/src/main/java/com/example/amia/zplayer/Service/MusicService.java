@@ -370,6 +370,31 @@ public class MusicService extends Service {
         return mediaPlayer.getDuration();
     }
 
+    private void removeMusic(List<Mp3Info> removeList){
+        for(Mp3Info rinfo:removeList){
+            Mp3Info temp=curretnMp3Info;
+            if(curretnMp3Info.getId()==rinfo.getId()){   //如果当前播放的音乐即在移除的列表中
+                if(musiclist.size()>1){    //如果没有其他音乐
+                    nextMusic();
+                }
+                else{
+                    stopMusic();
+                }
+                musiclist.remove(temp);
+                continue;
+            }
+            else{   //如果当前播放的音乐不在移除列表中，则遍历移除
+                for(int i=0;i<musiclist.size();i++){
+                    Mp3Info info=musiclist.get(i);
+                    if(rinfo.getId()==info.getId()){
+                        musiclist.remove(info);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     class MusicPlayMangerEntity extends Binder implements MusicPlayManager {
 
         @Override
@@ -465,6 +490,11 @@ public class MusicService extends Service {
         @Override
         public void subConnection() {
             MusicService.this.subConnection();
+        }
+
+        @Override
+        public void removeMusic(List<Mp3Info> removeList) {
+            MusicService.this.removeMusic(removeList);
         }
 
         public int getMusicLength() {

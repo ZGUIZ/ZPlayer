@@ -45,6 +45,7 @@ import com.example.amia.zplayer.util.ChangelateUtil;
 import com.example.amia.zplayer.util.MusicResolverUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MusicListActivity extends MusicAboutActivity implements View.OnClickListener {
 
@@ -317,14 +318,6 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         currentMp3Info.setInLove(false);
         love_ib.setImageDrawable(getResources().getDrawable(R.drawable.love,null));
         if(love_id==list_id){
-            /*
-            for(int i=0;i<mp3Infos.size();i++){
-                if(mp3Infos.get(i).getId()==currentMp3Info.getId()){
-                    mp3Infos.remove(i);
-                    break;
-                }
-            }
-            */
             int res=MusicListAcitvityUtils.findFromList(currentMp3Info,mp3Infos);
             if(res!=-1){
                 mp3Infos.remove(res);
@@ -396,16 +389,18 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
             cancel_LongPress();
             return;
         }
+        /*
         if (currentMp3Info!=null) {
             boolean flag=false;
             for(Mp3Info mp3Info:checkedMus){
-                if(mp3Info.getId()==currentMp3Info.getId()){
+                if(mp3Info.getId()==currentMp3Info.getId()){   //如果正在播放的音乐是否被删除
                     flag=true;
                     break;
                 }
             }
-            if(flag) {
-                if (mp3Infos.size() == checkedMus.size()) {
+            if(flag) {   //如果正在播放的音乐被删除
+                List<Mp3Info> playingList=musicPlayManager.getMusicList();
+                if (playingList.size() == checkedMus.size()) {  //如果全列表的音乐被删除
                     PauseMusic();
                     isplay=false;
                     musicPlayManager.stopMusic();
@@ -420,13 +415,16 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
                         index = (index+1) % mp3Infos.size();
                         info=mp3Infos.get(index);
                     }
-                    musicPlayManager.playMusic(mp3Infos, index);
+                    musicPlayManager.playMusic(playingList, index);
                 }
             }
         }
+        */
+        MusicListAcitvityUtils.removeFromList(this,list_id,mp3Infos,checkedMus);
+        musicPlayManager.removeMusic(checkedMus);
         MusicListAcitvityUtils.deleteMusicFromDisk(this, checkedMus, mp3Infos);
         musListAdapter.notifyDataSetChanged();
-        musicPlayManager.setMusicList(mp3Infos);
+        //musicPlayManager.setMusicList(mp3Infos);
         cancel_LongPress();
     }
 
