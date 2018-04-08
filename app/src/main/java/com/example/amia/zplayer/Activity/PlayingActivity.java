@@ -487,7 +487,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 PlayingActivityUtil.closeMusicList(this,half_muslist_rl,half_lsit_area);
                 break;
             case R.id.fixed_time_rl:
-
+                Toast.makeText(this,"该功能尚未完成",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.down_rl:
                 download();
@@ -508,6 +508,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
      * 下载
      */
     private void download(){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"没有正在播放的音乐",Toast.LENGTH_SHORT).show();
+            return;
+        }
         DownloadDao downloadDao=new DownloadDao(this);
         if(!(currentMp3Info instanceof MusicDownLoadInfo)||downloadDao.isInList(((MusicDownLoadInfo)currentMp3Info).getNetId())){
             Toast.makeText(this,"该音乐已经下载或者在下载队列！",Toast.LENGTH_SHORT).show();
@@ -518,6 +522,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     }
 
     private void download(MusicDownLoadInfo info){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"没有正在播放的音乐",Toast.LENGTH_SHORT).show();
+            return;
+        }
         DownloadUtil util=new DownloadUtil(this);
         util.downLoadMusic(info);
         info.setStatus(1);
@@ -526,6 +534,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     }
 
     private void shareMusic(){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"没有正在播放的音乐",Toast.LENGTH_SHORT).show();
+            return;
+        }
         PlayingActivityUtil.closeMusicList(this,otherLayout,other_ll);
         if(currentMp3Info instanceof MusicDownLoadInfo){
             Toast.makeText(this,"暂时不支持网络音乐分享",Toast.LENGTH_SHORT).show();
@@ -535,6 +547,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     }
 
     private void addTo(){
+        if(currentMp3Info==null){
+            Toast.makeText(this,"没有正在播放的音乐",Toast.LENGTH_SHORT).show();
+            return;
+        }
         if(currentMp3Info instanceof MusicDownLoadInfo){
             return;
         }

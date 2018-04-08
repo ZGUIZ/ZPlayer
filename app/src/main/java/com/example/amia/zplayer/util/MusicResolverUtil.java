@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.example.amia.zplayer.DTO.Mp3Info;
 import com.example.amia.zplayer.DTO.MusicOfList;
@@ -51,7 +50,7 @@ public class MusicResolverUtil {
             long size=cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
             long album_id=cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
 
-            int isMusic=cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+            //int isMusic=cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
             mp3Info.setId(id);
             mp3Info.setTitle(title);
             mp3Info.setArtist(artist);

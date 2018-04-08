@@ -45,7 +45,6 @@ import com.example.amia.zplayer.util.ChangelateUtil;
 import com.example.amia.zplayer.util.MusicResolverUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MusicListActivity extends MusicAboutActivity implements View.OnClickListener {
 
@@ -389,42 +388,10 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
             cancel_LongPress();
             return;
         }
-        /*
-        if (currentMp3Info!=null) {
-            boolean flag=false;
-            for(Mp3Info mp3Info:checkedMus){
-                if(mp3Info.getId()==currentMp3Info.getId()){   //如果正在播放的音乐是否被删除
-                    flag=true;
-                    break;
-                }
-            }
-            if(flag) {   //如果正在播放的音乐被删除
-                List<Mp3Info> playingList=musicPlayManager.getMusicList();
-                if (playingList.size() == checkedMus.size()) {  //如果全列表的音乐被删除
-                    PauseMusic();
-                    isplay=false;
-                    musicPlayManager.stopMusic();
-                    currentMp3Info=null;
-                } else {
-                    int index=0;
-                    while(currentMp3Info.getId()!=mp3Infos.get(index).getId()){
-                        index++;
-                    }
-                    Mp3Info info=mp3Infos.get((++index)%mp3Infos.size());
-                    while(info.isSelected()) {
-                        index = (index+1) % mp3Infos.size();
-                        info=mp3Infos.get(index);
-                    }
-                    musicPlayManager.playMusic(playingList, index);
-                }
-            }
-        }
-        */
         MusicListAcitvityUtils.removeFromList(this,list_id,mp3Infos,checkedMus);
         musicPlayManager.removeMusic(checkedMus);
         MusicListAcitvityUtils.deleteMusicFromDisk(this, checkedMus, mp3Infos);
         musListAdapter.notifyDataSetChanged();
-        //musicPlayManager.setMusicList(mp3Infos);
         cancel_LongPress();
     }
 

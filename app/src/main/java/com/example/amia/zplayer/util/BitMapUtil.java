@@ -101,11 +101,11 @@ public class BitMapUtil {
      * @throws IOException
      */
     public static void saveBitmap(Bitmap bitmap, String saveName, Context context) throws IOException {
-        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MusicPlayer");
+        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/pic");
         if(!dir.exists()){
             dir.mkdir();
         }
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MusicPlayer",saveName+".jpg");
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/pic",saveName+".jpg");
         if(file.exists()){
             file.delete();
         }

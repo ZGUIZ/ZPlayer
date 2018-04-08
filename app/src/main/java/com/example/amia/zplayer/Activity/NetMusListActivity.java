@@ -500,6 +500,8 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     }
 
     private void tryListen(Holder holder){
+        isplay=true;
+        setPauseButtonIcon();
         musicPlayManager.addToNext(holder.info);
         musicPlayManager.playMusic(holder.info);
     }
