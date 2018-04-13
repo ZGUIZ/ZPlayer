@@ -1,19 +1,24 @@
 package com.example.amia.zplayer.Activity;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageButton;
@@ -67,6 +72,17 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
     }
 
     private void init(){
+        //申请电话监听权限
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_PHONE_STATE},0);
+        }
+
+        //申请内存读写权限
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
+                ||ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
+        }
+
         selectionAdapter=new SelectionPagerAdapter(getSupportFragmentManager());
         pager=findViewById(R.id.view_pager);
         pager.setAdapter(selectionAdapter);
@@ -115,6 +131,23 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             public void onPageScrollStateChanged(int state) {
             }
         });
+
+        DrawerLayout drawerLayout=findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(this,drawerLayout,R.string.drawer_open,R.string.drawer_close);
+        toggle.syncState();
+        drawerLayout.addDrawerListener(toggle);
+
+        findViewById(R.id.exit).setOnClickListener(this);
+    }
+
+    /**
+     * 退出应用
+     */
+    private void exitApp(){
+        unbindService(musicServiceConnection);
+        Intent intent=new Intent(this,MusicService.class);
+        stopService(intent);
+        this.finish();
     }
 
     /*设置标题按钮颜色*/
@@ -178,7 +211,12 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         unregisterReceiver(pauseMusicReceiver);
         unregisterReceiver(musInfoRec);
         unregisterReceiver(currentPositionReceiver);
-        unbindService(musicServiceConnection);
+        try {
+            unbindService(musicServiceConnection);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     //绑定音乐服务
@@ -400,6 +438,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 break;
             case R.id.net_search_ib:
                 super.startActivity(NetMusicSearchActivity.class);
+                break;
+            case R.id.exit:
+                exitApp();
                 break;
         }
     }
