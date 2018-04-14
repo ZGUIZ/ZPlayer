@@ -19,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageButton;
@@ -38,6 +39,7 @@ import com.example.amia.zplayer.Receiver.CurrentPositionReceiver;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PauseMusicReceiver;
 import com.example.amia.zplayer.Service.MusicService;
+import com.example.amia.zplayer.util.LrcResovler;
 
 public class IndexActivity extends MusicAboutActivity implements View.OnClickListener{
 
@@ -60,6 +62,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
     private MusicListDao musicListDao;
     private MusicOfListDao musicOfListDao;
 
+    private static final int REQUEST_PHONE_STATE=0;
+    private static final int REQUEST_EXTERNAL_STORAGE=1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,13 +79,13 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
     private void init(){
         //申请电话监听权限
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_PHONE_STATE},0);
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_PHONE_STATE},REQUEST_PHONE_STATE);
         }
 
         //申请内存读写权限
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
                 ||ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_EXTERNAL_STORAGE);
         }
 
         selectionAdapter=new SelectionPagerAdapter(getSupportFragmentManager());
@@ -132,12 +137,16 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             }
         });
 
+        Toolbar toolbar=findViewById(R.id.tit_bar);
+        setSupportActionBar(toolbar);
+
         DrawerLayout drawerLayout=findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(this,drawerLayout,R.string.drawer_open,R.string.drawer_close);
         toggle.syncState();
         drawerLayout.addDrawerListener(toggle);
 
         findViewById(R.id.exit).setOnClickListener(this);
+        findViewById(R.id.clear_ache_bt).setOnClickListener(this);
     }
 
     /**
@@ -316,6 +325,19 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        switch (requestCode){
+            case REQUEST_PHONE_STATE:
+                Toast.makeText(this,"申请权限失败，可能导致来电音乐无法暂停",Toast.LENGTH_SHORT).show();
+                break;
+            case REQUEST_EXTERNAL_STORAGE:
+                Toast.makeText(this,"申请权限失败！",Toast.LENGTH_SHORT).show();
+                System.exit(0);
+                break;
+        }
+    }
+
     /**
      * 添加到我喜欢
      */
@@ -441,6 +463,10 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 break;
             case R.id.exit:
                 exitApp();
+                break;
+            case R.id.clear_ache_bt:
+                LrcResovler.delAllLrc();
+                Toast.makeText(this,"清除成功！",Toast.LENGTH_SHORT).show();
                 break;
         }
     }

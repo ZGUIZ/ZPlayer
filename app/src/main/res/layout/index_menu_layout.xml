@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/menu_top"
+        android:background="@drawable/background"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+        <ImageView
+            android:id="@+id/photo_iv"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/photo"
+            android:scaleType="fitCenter"
+            android:layout_marginLeft="25dp"
+            android:layout_marginBottom="17dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp" />
+        <TextView
+            android:layout_marginLeft="12dp"
+            android:layout_alignBottom="@id/photo_iv"
+            android:layout_marginBottom="12dp"
+            android:textSize="20dp"
+            android:layout_toRightOf="@id/photo_iv"
+            android:layout_centerVertical="true"
+            android:text="ZPlayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/menu_bottom_layout"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/setting"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:text="设置"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <View
+            android:background="#cccccc"
+            android:layout_width="1dp"
+            android:layout_height="50dp"/>
+        <Button
+            android:id="@+id/exit"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:text="退出"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <View
+        android:id="@+id/line_view"
+        android:layout_above="@id/menu_bottom_layout"
+        android:background="#CCCCCC"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <LinearLayout
+        android:layout_below="@id/menu_top"
+        android:layout_above="@id/line_view"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/sche_stop_bt"
+            android:text="定时停止"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/clear_ache_bt"
+            android:text="清除缓存"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

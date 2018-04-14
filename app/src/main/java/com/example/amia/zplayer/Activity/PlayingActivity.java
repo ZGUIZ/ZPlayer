@@ -73,6 +73,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     private ImageButton mode_ib;
     private ImageButton love_ib;
 
+
     private ImageView music_album;
     private TextView title_tv;
     private TextView artist_tv;

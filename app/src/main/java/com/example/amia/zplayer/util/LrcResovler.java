@@ -70,4 +70,17 @@ public class LrcResovler {
         }
         return lrc;
     }
+
+    public static void delAllLrc(){
+        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/lrc/";
+        File file=new File(path);
+        String[] lrcList=file.list();
+        File lrc=null;
+        for(int i=0;i<lrcList.length;i++){
+            lrc=new File(path+lrcList[i].trim());
+            if (lrc.isFile()) {
+                lrc.delete();
+            }
+        }
+    }
 }

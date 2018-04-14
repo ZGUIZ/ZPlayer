@@ -6,16 +6,32 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="com.example.amia.zplayer.Activity.IndexActivity">
-
-    <include layout="@layout/title_bar"/>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/view_pager"
-        android:layout_below="@+id/tit_bar"
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/con_bar"></android.support.v4.view.ViewPager>
-
-    <include layout="@layout/bottom_control" />
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <include layout="@layout/title_bar"/>
+            <android.support.v4.view.ViewPager
+                android:id="@+id/view_pager"
+                android:layout_below="@id/tit_bar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/con_bar"></android.support.v4.view.ViewPager>
+            <include layout="@layout/bottom_control" />
+        </RelativeLayout>
+        <LinearLayout
+            android:clickable="true"
+            android:background="@android:color/white"
+            android:layout_gravity="start"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <include layout="@layout/index_menu_layout"/>
+        </LinearLayout>
+    </android.support.v4.widget.DrawerLayout>
 
 </RelativeLayout>
