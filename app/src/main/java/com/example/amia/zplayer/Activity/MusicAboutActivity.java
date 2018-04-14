@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.example.amia.zplayer.DTO.Mp3Info;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
+import com.example.amia.zplayer.Receiver.ScheStopReceiver;
 import com.example.amia.zplayer.util.MusicResolverUtil;
 
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public abstract class MusicAboutActivity extends AppCompatActivity {
 
     protected Mp3Info currentMp3Info;
     protected static boolean isplay=false;
+    protected static boolean isSche;
     protected HashMap<String,Bitmap> bitMap;          //专辑图哈希表,key为音乐信息的id
 
     protected static MusicResolverUtil musicResolverUtil;
@@ -32,6 +34,7 @@ public abstract class MusicAboutActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
+        isSche=false;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -65,4 +68,14 @@ public abstract class MusicAboutActivity extends AppCompatActivity {
             setCurrentMusicInfo(currentMp3Info);
         }
     };
+
+    protected class ScheReceiver extends ScheStopReceiver {
+
+        @Override
+        protected void setLastTime(String time) {
+            setScheLastTimeFromService(time);
+        }
+    }
+
+    protected abstract void setScheLastTimeFromService(String time);
 }

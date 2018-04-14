@@ -2,6 +2,7 @@ package com.example.amia.zplayer.Activity;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -12,11 +13,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -65,6 +68,10 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     protected static MusicServiceConnection musicServiceConnection;
     protected static MusicPlayManager musicPlayManager;
 
+    private static CurrentPositionReceiver currentPositionReceiver;  //当前音乐进度接收者
+    private static ScheReceiver scheReceiver;
+    private static LocalBroadcastManager broadcastManager;
+
     private ViewPager viewPager;
     private TextView current_time_tv;
     private TextView acount_time_time;
@@ -93,6 +100,9 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
     private RelativeLayout half_lsit_area;   //音乐列表区域布局
     private RelativeLayout otherLayout;      //其他操作的整个布局
     private LinearLayout other_ll;           //其他操作的操作区
+
+    private TextView fixed_time_tv;
+    private ImageView fixed_time_iv;
 
     private List<Mp3Info> musList;     //当前播放列表
     private List<LrcEntity> lrcList;   //歌词列表
@@ -203,6 +213,9 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 lrcAdapter.notifyDataSetChanged();
             }
         });
+
+        fixed_time_iv=findViewById(R.id.fixed_time_iv);
+        fixed_time_tv=findViewById(R.id.fixed_time_tv);
     }
 
     //设置音乐列表的适配器
@@ -260,6 +273,9 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         registerMusicInfoReceiver();
         registerCurrentPositReceiver();
         registerHeadsetrPlugReceiver();
+        //设置暂停时间接受者
+        registerScheStopReceiver();
+        fixed_time_tv.setText("定时停止");
         super.onStart();
     }
 
@@ -292,6 +308,15 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         IntentFilter filter=new IntentFilter();
         filter.addAction(currentPositReceiver.currentPositionActionName);
         registerReceiver(currentPositReceiver,filter);
+    }
+
+    //注册定时停止的接受者
+    protected void registerScheStopReceiver(){
+        scheReceiver=new ScheReceiver();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(MusicService.scheSotpKey);
+        broadcastManager=LocalBroadcastManager.getInstance(this);
+        broadcastManager.registerReceiver(scheReceiver,filter);
     }
 
     //暂停并调用Service的暂停方法
@@ -488,7 +513,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
                 PlayingActivityUtil.closeMusicList(this,half_muslist_rl,half_lsit_area);
                 break;
             case R.id.fixed_time_rl:
-                Toast.makeText(this,"该功能尚未完成",Toast.LENGTH_SHORT).show();
+                scheButtonClick();
                 break;
             case R.id.down_rl:
                 download();
@@ -667,6 +692,7 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         unregisterReceiver(currentPositReceiver);
         unbindService(musicServiceConnection);
         unregisterReceiver(headsetrPlugReceiver);
+        broadcastManager.unregisterReceiver(scheReceiver);
         super.onStop();
     }
 
@@ -688,6 +714,61 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
         Message msg=handler.obtainMessage();
         msg.what=0;
         handler.sendMessage(msg);
+    }
+
+    //从服务器接收到定时信息
+    protected void setScheLastTimeFromService(String time){
+        if(time.equals("0 : 0")||time.equals("00 : 00")){
+            fixed_time_tv.setText("定时停止");
+            isSche=false;
+            isplay=false;
+            setPauseButtonIcon();
+        }
+        else{
+            fixed_time_tv.setText("取消定时("+time+")");
+            isSche=true;
+        }
+    }
+
+    //定时按钮被点击
+    private void scheButtonClick(){
+        if(isSche){
+            stopScheTime();
+        }
+        else{
+            setScheStopTime();
+        }
+    }
+
+    //设置定时信息
+    private void setScheStopTime(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("您希望多少分钟后停止？");
+        final EditText editText=new EditText(this);
+        editText.setHint("输入停止时间（分钟）");
+        editText.setSelectAllOnFocus(true);
+        builder.setView(editText);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    int time = Integer.parseInt(editText.getText().toString().trim());
+                    musicPlayManager.setStopTime(time);
+                    isSche=true;
+                }
+                catch (Exception e){
+                    Toast.makeText(PlayingActivity.this,"输入错误!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    //停止定时
+    private void stopScheTime(){
+        musicPlayManager.stopScheStop();
+        isSche=false;
+        fixed_time_tv.setText("定时停止");
     }
 
     //切换音乐时音乐信息接收者

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -15,13 +16,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +43,7 @@ import com.example.amia.zplayer.R;
 import com.example.amia.zplayer.Receiver.CurrentPositionReceiver;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PauseMusicReceiver;
+import com.example.amia.zplayer.Receiver.ScheStopReceiver;
 import com.example.amia.zplayer.Service.MusicService;
 import com.example.amia.zplayer.util.LrcResovler;
 
@@ -53,11 +59,14 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
     private TextView title_tv;                  //音乐名称组件
     private TextView artist_tv;                 //演唱者名称组件
     private ImageView music_album;           //专辑图片组件
+    private Button scheButton;               //设置定时结束的按钮
 
     private static PauseMusicReceiver pauseMusicReceiver;
     private static MusicServiceConnection musicServiceConnection;  //音乐服务连接
     private static MusInfoRec musInfoRec;          //音乐信息接收者
-    private static CurrentPositionReceiver currentPositionReceiver;
+    private static CurrentPositionReceiver currentPositionReceiver;  //当前音乐进度接收者
+    private static ScheReceiver scheReceiver;
+    private static LocalBroadcastManager broadcastManager;
 
     private MusicListDao musicListDao;
     private MusicOfListDao musicOfListDao;
@@ -147,6 +156,8 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
 
         findViewById(R.id.exit).setOnClickListener(this);
         findViewById(R.id.clear_ache_bt).setOnClickListener(this);
+        scheButton=findViewById(R.id.sche_stop_bt);
+        scheButton.setOnClickListener(this);
     }
 
     /**
@@ -185,6 +196,10 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         registerCurrentPositionReceiver();
         //设置暂停按钮图标
         setPauseButtonIcon();
+        //设置暂停时间接受者
+        registerScheStopReceiver();
+
+        scheButton.setText("定时停止");
         super.onStart();
     }
 
@@ -220,6 +235,7 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         unregisterReceiver(pauseMusicReceiver);
         unregisterReceiver(musInfoRec);
         unregisterReceiver(currentPositionReceiver);
+        broadcastManager.unregisterReceiver(scheReceiver);
         try {
             unbindService(musicServiceConnection);
         }
@@ -258,6 +274,66 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         filter.addAction(CurrentPositionReceiver.currentPositionActionName);
         this.registerReceiver(currentPositionReceiver,filter);
     }
+
+    protected void registerScheStopReceiver(){
+        scheReceiver=new ScheReceiver();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(MusicService.scheSotpKey);
+        broadcastManager=LocalBroadcastManager.getInstance(this);
+        broadcastManager.registerReceiver(scheReceiver,filter);
+    }
+
+    protected void setScheLastTimeFromService(String time){
+        if(time.equals("0 : 0")||time.equals("00 : 00")){
+            scheButton.setText("定时停止");
+            isSche=false;
+            isplay=false;
+            setPauseButtonIcon();
+        }
+        else{
+            scheButton.setText("取消定时("+time+")");
+            isSche=true;
+        }
+    }
+
+    private void scheButtonClick(){
+        if(isSche){
+            stopScheTime();
+        }
+        else{
+            setScheStopTime();
+        }
+    }
+
+    private void setScheStopTime(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("您希望多少分钟后停止？");
+        final EditText editText=new EditText(this);
+        editText.setHint("输入停止时间（分钟）");
+        editText.setSelectAllOnFocus(true);
+        builder.setView(editText);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    int time = Integer.parseInt(editText.getText().toString().trim());
+                    musicPlayManager.setStopTime(time);
+                    isSche=true;
+                }
+                catch (Exception e){
+                    Toast.makeText(IndexActivity.this,"输入错误!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void stopScheTime(){
+        musicPlayManager.stopScheStop();
+        isSche=false;
+        scheButton.setText("定时停止");
+    }
+
 
     private void continuePlayMusic(){
         musicPlayManager.resumePlay();
@@ -467,6 +543,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
             case R.id.clear_ache_bt:
                 LrcResovler.delAllLrc();
                 Toast.makeText(this,"清除成功！",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.sche_stop_bt:
+                scheButtonClick();
                 break;
         }
     }

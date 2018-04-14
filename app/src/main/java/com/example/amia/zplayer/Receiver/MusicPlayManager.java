@@ -132,4 +132,15 @@ public interface MusicPlayManager{
      * @param removeList
      */
     void removeMusic(List<Mp3Info> removeList);
+
+    /**
+     * 设置暂停时间
+     * @param minute
+     */
+    void setStopTime(int minute);
+
+    /**
+     * 停止暂停
+     */
+    void stopScheStop();
 }

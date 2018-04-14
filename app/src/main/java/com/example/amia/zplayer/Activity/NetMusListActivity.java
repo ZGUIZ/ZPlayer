@@ -71,6 +71,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     private static CurrentPositionReceiver currentPositionReceiver;
     private DownLoadReceiver downLoadReceiver;
     private LocalBroadcastManager manager;
+    private static ScheReceiver scheReceiver;
 
     private ImageButton pausebutton;         //暂停按钮
     private ImageButton love_ib;             //添加到我喜欢按钮
@@ -103,6 +104,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     }
 
     protected void init(Intent intent){
+        manager=LocalBroadcastManager.getInstance(this);
         MusicClassify classify= (MusicClassify) intent.getSerializableExtra("classify");
         startSearchThread(classify);
 
@@ -214,6 +216,8 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         registerCurrentPositionReceiver();
         //设置暂停按钮图标
         setPauseButtonIcon();
+        //定时结束监听者
+        registerScheStopReceiver();
         super.onStart();
     }
 
@@ -234,6 +238,8 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         unregisterReceiver(musInfoRec);
         unregisterReceiver(currentPositionReceiver);
         unbindService(musicServiceConnection);
+        manager.unregisterReceiver(scheReceiver);
+        manager.unregisterReceiver(downLoadReceiver);
     }
 
     //设置暂停按钮的图标
@@ -290,8 +296,14 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
         downLoadReceiver=new DownLoadReceiver();
         IntentFilter filter=new IntentFilter();
         filter.addAction(DownloadUtil.PROGRESS_ACTION);
-        manager=LocalBroadcastManager.getInstance(this);
         manager.registerReceiver(downLoadReceiver,filter);
+    }
+
+    protected void registerScheStopReceiver(){
+        scheReceiver=new ScheReceiver();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(MusicService.scheSotpKey);
+        manager.registerReceiver(scheReceiver,filter);
     }
 
     @Override
@@ -356,9 +368,12 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
     }
 
     @Override
-    protected void onDestroy(){
-        manager.unregisterReceiver(downLoadReceiver);
-        super.onDestroy();
+    protected void setScheLastTimeFromService(String time) {
+        if(time.equals("0 : 0")||time.equals("00 : 00")){
+            isSche=false;
+            isplay=false;
+            pausebutton.setImageDrawable(getResources().getDrawable(R.drawable.play,null));
+        }
     }
 
     /**

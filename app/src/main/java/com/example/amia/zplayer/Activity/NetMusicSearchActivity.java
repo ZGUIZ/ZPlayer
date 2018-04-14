@@ -219,6 +219,11 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
     public void setCurrentMusicInfo(Mp3Info info) {
     }
 
+    @Override
+    protected void setScheLastTimeFromService(String time) {
+
+    }
+
     class NetMusicAdapter extends BaseAdapter{
 
         @Override

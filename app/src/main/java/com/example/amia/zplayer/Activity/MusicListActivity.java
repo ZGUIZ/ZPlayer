@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -92,6 +93,9 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
     private static CurrentPositionReceiver currentPositionReceiver;  //播放进度接收者
     private static MusicServiceConnection musicServiceConnection;   //服务连接器
     private static MusInfoRec musInfoRec;          //音乐信息接收者
+    private static ScheReceiver scheReceiver;
+    private static LocalBroadcastManager broadcastManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -435,6 +439,8 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         registerMusicrInfoReceiver();
         //播放进度接收者
         registerCurrentPositionReceiver();
+        //定时结束监听者
+        registerScheStopReceiver();
         super.onStart();
     }
 
@@ -445,6 +451,7 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         unregisterReceiver(pauseMusicReceiver);
         unregisterReceiver(musInfoRec);
         unregisterReceiver(currentPositionReceiver);
+        broadcastManager.unregisterReceiver(scheReceiver);
         unbindService(musicServiceConnection);
     }
 
@@ -482,6 +489,14 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
         IntentFilter filter=new IntentFilter();
         filter.addAction("amia.musicplayer.action.MusicChange");
         this.registerReceiver(musInfoRec,filter);
+    }
+
+    protected void registerScheStopReceiver(){
+        scheReceiver=new ScheReceiver();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(MusicService.scheSotpKey);
+        broadcastManager=LocalBroadcastManager.getInstance(this);
+        broadcastManager.registerReceiver(scheReceiver,filter);
     }
 
     @Override
@@ -534,6 +549,15 @@ public class MusicListActivity extends MusicAboutActivity implements View.OnClic
             if(currentMp3Info instanceof MusicDownLoadInfo){
                 love_ib.setClickable(false);
             }
+        }
+    }
+
+    @Override
+    protected void setScheLastTimeFromService(String time) {
+        if(time.equals("0 : 0")||time.equals("00 : 00")){
+            isSche=false;
+            isplay=false;
+            setPausebuttonIcon();
         }
     }
 

@@ -40,12 +40,14 @@
                 android:layout_height="60dp"
                 android:layout_columnWeight="1">
                 <ImageView
+                    android:id="@+id/fixed_time_iv"
                     android:layout_centerHorizontal="true"
                     android:src="@drawable/fix_time"
                     android:padding="8dp"
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <TextView
+                    android:id="@+id/fixed_time_tv"
                     android:text="定时停止"
                     android:layout_alignParentBottom="true"
                     android:textAlignment="center"
