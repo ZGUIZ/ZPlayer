@@ -19,7 +19,7 @@ public class DownloadApp extends Application {
     }
 
     public void onTerminate(){
-        Log.i("DownloadApp","onTerminate");
+        //Log.i("DownloadApp","onTerminate");
         DownloadUtil.pool.shutdown();  //关闭线程池
         DownloadDao dao=new DownloadDao(this);
         dao.allDownLoadPause();

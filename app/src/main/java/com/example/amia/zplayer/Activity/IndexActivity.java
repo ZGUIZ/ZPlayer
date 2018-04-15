@@ -73,6 +73,7 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
 
     private static final int REQUEST_PHONE_STATE=0;
     private static final int REQUEST_EXTERNAL_STORAGE=1;
+    private static final int REQUEST_NET_STATE=2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +90,10 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         //申请电话监听权限
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_PHONE_STATE},REQUEST_PHONE_STATE);
+        }
+
+        if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_NETWORK_STATE)!=PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_NETWORK_STATE},REQUEST_NET_STATE);
         }
 
         //申请内存读写权限
@@ -158,6 +163,7 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         findViewById(R.id.clear_ache_bt).setOnClickListener(this);
         scheButton=findViewById(R.id.sche_stop_bt);
         scheButton.setOnClickListener(this);
+        findViewById(R.id.setting).setOnClickListener(this);
     }
 
     /**
@@ -411,6 +417,10 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 Toast.makeText(this,"申请权限失败！",Toast.LENGTH_SHORT).show();
                 System.exit(0);
                 break;
+            case REQUEST_NET_STATE:
+                Toast.makeText(this,"申请网络权限失败！",Toast.LENGTH_SHORT).show();
+                System.exit(0);
+                break;
         }
     }
 
@@ -546,6 +556,9 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 break;
             case R.id.sche_stop_bt:
                 scheButtonClick();
+                break;
+            case R.id.setting:
+                super.startActivity(SettingActivity.class);
                 break;
         }
     }

@@ -134,7 +134,7 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
             public void run() {
                 String res;
                 try {
-                    res= NetUtils.requestDataFromNet(getResources().getString(R.string.findAllClassify));
+                    res= NetUtils.requestDataFromNet(activity,getResources().getString(R.string.findAllClassify));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                     res=null;

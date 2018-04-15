@@ -1,12 +1,14 @@
 package com.example.amia.zplayer.Service;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
@@ -35,8 +37,9 @@ public class MusicService extends Service {
     private static MediaPlayer mediaPlayer;
     private Mp3Info curretnMp3Info;    //当前播放的音乐
     private List<Mp3Info> musiclist;   //当前播放的列表
-    private boolean isPlaying;
+    private boolean isPlaying;         //是否正在播放
     private EarringPutOutReceiver headsetrPlugReceiver;
+    private static int sche_time;
 
     private static int connCount=0;   //记录连接数量
 
@@ -49,10 +52,12 @@ public class MusicService extends Service {
     public MusicPlayStatus status;//播放模式
 
     private static ExecutorService executorService;  //线程池
+    private ExecutorService schemeStopPool;         //定时停止线程池
 
     private final static String tranTarget="amia.musicplayer.action.MusicChange";
     private final static String currentPositionActionName="com.example.amia.musicplayer.currentPosition";
     private final static String currentPositionKey="currentPosition";
+    public final static String scheSotpKey="lastTimeToStop";
 
     private IBinder iBinder;
 
@@ -72,10 +77,12 @@ public class MusicService extends Service {
         //创建线程池
         try{
             executorService= Executors.newSingleThreadExecutor();
+            schemeStopPool=Executors.newCachedThreadPool();
         }
         catch (Exception e){
             e.printStackTrace();
         }
+        sche_time=-1;
     }
 
     public void onCreate(){
@@ -132,6 +139,7 @@ public class MusicService extends Service {
     public void onDestroy(){
         //Log.i("MusicServer","销毁：onDestory");
         executorService.shutdown();
+        schemeStopPool.shutdown();
         unregisterReceiver(headsetrPlugReceiver);
         mediaPlayer.stop();
         mediaPlayer.release();
@@ -393,6 +401,50 @@ public class MusicService extends Service {
         }
     }
 
+    /**
+     * 设置定时播放时间
+     * @param minute
+     */
+    private void setStopTime(int minute){
+        final LocalBroadcastManager manager=LocalBroadcastManager.getInstance(this);
+        final Intent intent=new Intent();
+        intent.setAction(scheSotpKey);
+        if(sche_time<=-1){
+            sche_time=minute*60;
+            schemeStopPool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    while (sche_time >= -1) {
+                        //发送广播
+                        intent.putExtra(scheSotpKey,sche_time);
+                        manager.sendBroadcast(intent);
+                        if (sche_time == 0) {
+                            pauseMusic();
+                            sche_time--;
+                            return;
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        sche_time--;
+                    }
+                }
+            });
+        }
+        else{
+            sche_time=minute;
+        }
+    }
+
+    /**
+     * 停止定时播放
+     */
+    private void stopScheStop(){
+        sche_time=-1;
+    }
+
     class MusicPlayMangerEntity extends Binder implements MusicPlayManager {
 
         @Override
@@ -493,6 +545,16 @@ public class MusicService extends Service {
         @Override
         public void removeMusic(List<Mp3Info> removeList) {
             MusicService.this.removeMusic(removeList);
+        }
+
+        @Override
+        public void setStopTime(int minute) {
+            MusicService.this.setStopTime(minute);
+        }
+
+        @Override
+        public void stopScheStop() {
+            MusicService.this.stopScheStop();
         }
 
     }

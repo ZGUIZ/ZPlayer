@@ -24,7 +24,7 @@ public class SearchMusicJson {
             sb.append("&pageNo=");
             sb.append(searchCond[1]);
         }
-        String res=NetUtils.requestDataFromNet(sb.toString());
+        String res=NetUtils.requestDataFromNet(context,sb.toString());
         return res;
     }
 

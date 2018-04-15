@@ -164,7 +164,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             public void run() {
                 String res=null;
                 try {
-                    res= NetUtils.requestDataFromNet(getResources().getString(R.string.queryMusicInList)+classify.getId());
+                    res= NetUtils.requestDataFromNet(NetMusListActivity.this,getResources().getString(R.string.queryMusicInList)+classify.getId());
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }

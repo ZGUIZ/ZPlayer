@@ -85,7 +85,7 @@ public class DownloadUtil {
             public void run() {
                 String result = null;
                 try {
-                    result = NetUtils.requestDataFromNet(url);
+                    result = NetUtils.requestDataFromNet(context,url);
                     List<Object> objects= JsonResolveUtils.resolveJson(result,LrcDownLoadInfo.class);
                     if(objects.size()>0) {
                         downLoadLrc((LrcDownLoadInfo) objects.get(i));
