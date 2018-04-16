@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.amia.zplayer.DAO.MusicListDao;
@@ -23,6 +24,7 @@ import com.example.amia.zplayer.Receiver.EarringPutOutReceiver;
 import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PhoneCallListener;
 import com.example.amia.zplayer.util.RandomIdUtil;
+import com.example.amia.zplayer.util.XmlReadWriteUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,8 @@ public class MusicService extends Service {
     private static int sche_time;
 
     private static int connCount=0;   //记录连接数量
+    private static boolean isFirstOpen;
+    private static int lastProgress;
 
     protected MusicListDao musicListDao;
     protected MusicOfListDao musicOfListDao;
@@ -63,6 +67,7 @@ public class MusicService extends Service {
 
     public MusicService() {
         iBinder=new MusicPlayMangerEntity();
+        isFirstOpen=true;
 
         musicListDao=new MusicListDao(this);
         musicOfListDao=new MusicOfListDao(this);
@@ -89,6 +94,27 @@ public class MusicService extends Service {
         super.onCreate();
         registerPhoneCallReceiver();
         registerHeadsetPlugReceiver();
+        readLastProgress();
+    }
+
+    private void readLastProgress(){
+        XmlReadWriteUtil util=new XmlReadWriteUtil(this);
+        Object[] res=util.readMusicList();
+        musiclist= (List<Mp3Info>) res[0];
+        if(musiclist.size()==0){
+            return;
+        }
+        curretnMp3Info=musiclist.get((int)res[1]);
+        lastProgress=(int)res[2];
+        playAndPauseTo();
+    }
+
+    private void playAndPauseTo(){
+        if(curretnMp3Info==null){
+            isFirstOpen=false;
+            return;
+        }
+        playerAndPauseTo(curretnMp3Info,lastProgress);
     }
 
     //注册耳机事件接收者
@@ -138,13 +164,48 @@ public class MusicService extends Service {
     @Override
     public void onDestroy(){
         //Log.i("MusicServer","销毁：onDestory");
+        mediaPlayer.pause();
         executorService.shutdown();
         schemeStopPool.shutdown();
         unregisterReceiver(headsetrPlugReceiver);
+        saveProgress();
         mediaPlayer.stop();
         mediaPlayer.release();
         unregisiterPhoneCallReceiver();
         super.onDestroy();
+    }
+
+    /**
+     * 保存播放进度
+     */
+    private void saveProgress(){
+        if(musiclist==null||musiclist.isEmpty()||curretnMp3Info==null){
+            return;
+        }
+        XmlReadWriteUtil util=new XmlReadWriteUtil(this);
+        util.writeMusicList(musiclist,musiclist.indexOf(curretnMp3Info),mediaPlayer.getCurrentPosition());
+    }
+
+    private void playerAndPauseTo(Mp3Info mp3Info,int currentTime){
+        playAndPauseTo(mp3Info.getUrl(),currentTime);
+    }
+
+    private void playAndPauseTo(String url, final int currentTime){
+        try {
+            File file=new File(url);
+            Log.i("Service",url);
+            mediaPlayer.reset();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setDataSource(file.getAbsolutePath());
+            mediaPlayer.prepare();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        catch (IllegalStateException e){
+            e.printStackTrace();
+            playAndPauseTo(url,currentTime);
+        }
     }
 
     private void playMusic(final List<Mp3Info> mp3Infos, final int position){
@@ -155,6 +216,7 @@ public class MusicService extends Service {
     }
 
     private void playMusic(Mp3Info mp3Info){
+        isFirstOpen=false;
         if(musiclist.indexOf(mp3Info)==-1){
             musiclist=new Vector<>();
             musiclist.add(mp3Info);
@@ -284,6 +346,7 @@ public class MusicService extends Service {
     }
 
     public void resumePlay(){
+        isFirstOpen=false;
         mediaPlayer.start();
         isPlaying=true;
         sentCurrentTime();
@@ -563,7 +626,11 @@ public class MusicService extends Service {
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            //Log.d("onCompletion", "播放结束");
+            Log.d("onCompletion", "播放结束");
+            if(isFirstOpen){
+                playAndPauseTo();
+                return;
+            }
             isPlaying=false;
             if (curretnMp3Info != null) {
                 switch (status){
@@ -602,6 +669,25 @@ public class MusicService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
             //Log.i("MusicService","发送数据");
+            if(isFirstOpen){
+                mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                    @Override
+                    public void onSeekComplete(MediaPlayer mediaPlayer) {
+                        if(isFirstOpen){
+                            mediaPlayer.pause();
+                            isFirstOpen=false;
+                            Intent progressIntent=new Intent();
+                            progressIntent.setAction(currentPositionActionName);
+                            progressIntent.removeExtra(currentPositionKey);
+                            progressIntent.putExtra(currentPositionKey,lastProgress);
+                            sendBroadcast(progressIntent);
+                        }
+                    }
+                });
+                mediaPlayer.start();
+                mediaPlayer.pause();
+                mediaPlayer.seekTo(lastProgress);
+            }
             if(connCount<=0){
                 return;
             }
