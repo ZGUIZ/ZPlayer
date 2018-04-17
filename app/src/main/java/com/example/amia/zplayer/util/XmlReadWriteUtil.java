@@ -80,9 +80,7 @@ public class XmlReadWriteUtil {
     public void writeMusicList(List<Mp3Info>mp3Infos,int set, int currentTime){
         String path= Environment.getExternalStorageDirectory().getAbsolutePath()+context.getResources().getString(R.string.list_file);
         File file=new File(path);
-//        if(file.exists()){
-//            file.delete();
-//        }
+        boolean netMusicFlag=false;
         FileOutputStream outputStream=null;
         try {
             outputStream=new FileOutputStream(file);
@@ -94,6 +92,7 @@ public class XmlReadWriteUtil {
             for (int i = 0; i < mp3Infos.size(); i++) {
                 Mp3Info mp3Info = mp3Infos.get(i);
                 if(mp3Info instanceof MusicDownLoadInfo){
+                    netMusicFlag=true;
                     continue;
                 }
                 serializer.startTag(null,"music");
@@ -128,7 +127,7 @@ public class XmlReadWriteUtil {
             }
             serializer.endTag(null,"musicList");
 
-            if(mp3Infos.get(set) instanceof MusicDownLoadInfo){
+            if(netMusicFlag){
                 set=0;
                 currentTime=0;
             }
