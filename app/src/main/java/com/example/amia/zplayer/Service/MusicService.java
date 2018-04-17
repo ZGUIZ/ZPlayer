@@ -670,11 +670,18 @@ public class MusicService extends Service {
         public void onPrepared(MediaPlayer mp) {
             //Log.i("MusicService","发送数据");
             if(isFirstOpen){
+                mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                    @Override
+                    public void onSeekComplete(MediaPlayer mediaPlayer) {
+                        if(isFirstOpen){
+                            isFirstOpen=false;
+                            mediaPlayer.pause();
+                        }
+                    }
+                });
                 mediaPlayer.start();
                 mediaPlayer.pause();
                 mediaPlayer.seekTo(lastProgress);
-
-                isFirstOpen=false;
                 Intent progressIntent=new Intent();
                 progressIntent.setAction(currentPositionActionName);
                 progressIntent.removeExtra(currentPositionKey);

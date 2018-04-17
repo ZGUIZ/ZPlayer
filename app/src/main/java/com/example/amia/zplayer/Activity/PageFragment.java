@@ -75,6 +75,9 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
 
     private MusiclistListItemAdapter dynamic_item_adapter;
 
+    private static Bitmap defaultBitmap;
+    private static int defaultBitmapHeight;
+
     public PageFragment(){
     }
 
@@ -90,6 +93,13 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle savedInstanceState){
+        if(defaultBitmap==null){
+            WindowInfoMananger mananger=new WindowInfoMananger((AppCompatActivity) activity);
+            Point point=mananger.getScreenWidthHight();
+            defaultBitmapHeight=point.x/3-6;
+            defaultBitmap=BitmapFactory.decodeResource(activity.getResources(),R.drawable.defaluticon);
+            defaultBitmap=BitMapUtil.getOrderSizeBitmap(defaultBitmap,defaultBitmapHeight,defaultBitmapHeight);
+        }
         View view=null;
         switch (divide){
             case 0:
@@ -120,6 +130,9 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
                 Intent intent=new Intent(activity,NetMusListActivity.class);
                 intent.putExtra("classify",classify);
                 Bitmap bitmap=(view.findViewById(R.id.classify_icon)).getDrawingCache();
+                if(bitmap==null){
+                    bitmap=BitmapFactory.decodeResource(getResources(),R.drawable.defaluticon);
+                }
                 intent.putExtra("bitmap",BitMapUtil.bitmapToByte(bitmap));
                 startActivity(intent);
             }
@@ -425,25 +438,34 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
             holder.class_id=classify.getId();
             holder.title_tv.setText(classify.getName());
             holder.icon_iv.setDrawingCacheEnabled(true);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        Bundle bundle=new Bundle();
-                        bundle.putInt("class_id",holder.class_id);
-                        Bitmap bitmap=NetUtils.getURLImage("http://"+getResources().getString(R.string.down_host)+classify.getIconurl());
-                        Message msg=bitmapHandler.obtainMessage();
-                        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
-                        bundle.putByteArray("bitmap",outputStream.toByteArray());
-                        msg.setData(bundle);
-                        bitmapHandler.sendMessage(msg);
+            Bitmap temp=BitMapUtil.getBitMapByNetId(classify.getId());
+            if(temp==null) {
+                holder.icon_iv.setImageBitmap(defaultBitmap);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("class_id", holder.class_id);
+                            Bitmap bitmap = NetUtils.getURLImage("http://" + getResources().getString(R.string.down_host) + classify.getIconurl());
+                            Message msg = bitmapHandler.obtainMessage();
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                            bundle.putByteArray("bitmap", outputStream.toByteArray());
+                            msg.setData(bundle);
+                            bitmapHandler.sendMessage(msg);
+                            BitMapUtil.saveToTemp(bitmap,classify.getId());
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
+                }).start();
+            }
+            else{
+                temp=BitMapUtil.getOrderSizeBitmap(temp,defaultBitmapHeight,defaultBitmapHeight);
+                holder.icon_iv.setImageBitmap(temp);
+            }
             if(mOnItemClickListener!=null){
                 holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
                     @Override

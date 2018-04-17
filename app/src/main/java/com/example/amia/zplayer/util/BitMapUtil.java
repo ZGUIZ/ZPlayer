@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Created by Amia on 2017/8/6.
@@ -140,9 +141,98 @@ public class BitMapUtil {
         return path;
     }
 
-    public static byte[] bitmapToByte(Bitmap bitmap){
+    public static byte[] bitmapToByte(Bitmap bitmap) throws NullPointerException{
         ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
         return outputStream.toByteArray();
+    }
+
+    public static void saveToTemp(Bitmap bitmap,int listId){
+        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/temp/";
+        File file=new File(path);
+        if(!file.exists()){
+            file.mkdir();
+        }
+        File saveFile=new File(path+listId);
+        FileOutputStream outputStream=null;
+        try {
+            outputStream=new FileOutputStream(saveFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
+            outputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Bitmap getBitMapByNetId(int netId){
+        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/temp/"+netId;
+        File file=new File(path);
+        if(!file.exists()){
+            return null;
+        }
+        return BitmapFactory.decodeFile(path);
+    }
+
+    public static void defAllBitmapTemp(){
+        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/temp/";
+        File file=new File(path);
+        String[] lrcList=file.list();
+        File lrc=null;
+        for(int i=0;i<lrcList.length;i++){
+            lrc=new File(path+lrcList[i].trim());
+            if (lrc.isFile()) {
+                lrc.delete();
+            }
+        }
+    }
+
+    public static String getBimapTempSize(){
+        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/ZPlayer/temp/";
+        File file=new File(path);
+        if(file.exists()){
+            DecimalFormat decimalFormat=new DecimalFormat(".00");
+            long size=getFileSize(file);
+            float res=size/1024f;
+            if(res==0){
+                return null;
+            }
+            if(res<1024){
+                String str=decimalFormat.format(res);
+                return str+" KB";
+            }
+            else{
+                res=res/1024;
+                String str=decimalFormat.format(res);
+                return str+" MB";
+            }
+        }
+        else{
+            return null;
+        }
+    }
+
+    private static long getFileSize(File file){
+        if(file.isFile()){
+            return file.length();
+        }
+        File[] childFile=file.listFiles();
+        long total=0;
+        if(childFile!=null){
+            for(File child:childFile){
+                total+=getFileSize(child);
+            }
+        }
+        return total;
     }
 }

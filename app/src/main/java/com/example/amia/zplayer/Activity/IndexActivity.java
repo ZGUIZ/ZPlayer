@@ -45,6 +45,7 @@ import com.example.amia.zplayer.Receiver.MusicPlayManager;
 import com.example.amia.zplayer.Receiver.PauseMusicReceiver;
 import com.example.amia.zplayer.Receiver.ScheStopReceiver;
 import com.example.amia.zplayer.Service.MusicService;
+import com.example.amia.zplayer.util.BitMapUtil;
 import com.example.amia.zplayer.util.LrcResovler;
 
 public class IndexActivity extends MusicAboutActivity implements View.OnClickListener{
@@ -160,7 +161,12 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
         drawerLayout.addDrawerListener(toggle);
 
         findViewById(R.id.exit).setOnClickListener(this);
-        findViewById(R.id.clear_ache_bt).setOnClickListener(this);
+        Button clearButton=findViewById(R.id.clear_ache_bt);
+        clearButton.setOnClickListener(this);
+        String str=BitMapUtil.getBimapTempSize();
+        if(str!=null) {
+            clearButton.setText("清除缓存(" + str + ")");
+        }
         scheButton=findViewById(R.id.sche_stop_bt);
         scheButton.setOnClickListener(this);
         findViewById(R.id.setting).setOnClickListener(this);
@@ -551,8 +557,7 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 exitApp();
                 break;
             case R.id.clear_ache_bt:
-                LrcResovler.delAllLrc();
-                Toast.makeText(this,"清除成功！",Toast.LENGTH_SHORT).show();
+                clearAche();
                 break;
             case R.id.sche_stop_bt:
                 scheButtonClick();
@@ -561,5 +566,11 @@ public class IndexActivity extends MusicAboutActivity implements View.OnClickLis
                 super.startActivity(SettingActivity.class);
                 break;
         }
+    }
+    private void clearAche(){
+        LrcResovler.delAllLrc();
+        BitMapUtil.defAllBitmapTemp();
+        ((Button)findViewById(R.id.clear_ache_bt)).setText("清理缓存");
+        Toast.makeText(this,"清除成功！",Toast.LENGTH_SHORT).show();
     }
 }
