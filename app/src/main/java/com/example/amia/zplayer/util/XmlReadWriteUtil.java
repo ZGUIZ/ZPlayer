@@ -128,6 +128,10 @@ public class XmlReadWriteUtil {
             }
             serializer.endTag(null,"musicList");
 
+            if(mp3Infos.get(set) instanceof MusicDownLoadInfo){
+                set=0;
+                currentTime=0;
+            }
             serializer.startTag(null,"set");
             serializer.text(String.valueOf(set));
             serializer.endTag(null,"set");
