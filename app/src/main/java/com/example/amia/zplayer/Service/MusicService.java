@@ -187,7 +187,12 @@ public class MusicService extends Service {
     }
 
     private void playerAndPauseTo(Mp3Info mp3Info,int currentTime){
-        playAndPauseTo(mp3Info.getUrl(),currentTime);
+        if(mp3Info instanceof MusicDownLoadInfo){
+            playAndPauseTo((MusicDownLoadInfo)mp3Info);
+        }
+        else {
+            playAndPauseTo(mp3Info.getUrl(), currentTime);
+        }
     }
 
     private void playAndPauseTo(String url, final int currentTime){
@@ -205,6 +210,26 @@ public class MusicService extends Service {
         catch (IllegalStateException e){
             e.printStackTrace();
             playAndPauseTo(url,currentTime);
+        }
+    }
+
+    private void playAndPauseTo(MusicDownLoadInfo info){
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setDataSource("http://" + getResources().getString(R.string.down_host) + info.getNetUrl());
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                    mediaPlayer.pause();
+                    mediaPlayer.seekTo(lastProgress);
+                }
+            });
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -626,7 +651,7 @@ public class MusicService extends Service {
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            Log.d("onCompletion", "播放结束");
+            //Log.d("onCompletion", "播放结束");
             if(isFirstOpen){
                 playAndPauseTo();
                 return;
@@ -679,14 +704,17 @@ public class MusicService extends Service {
                         }
                     }
                 });
-                mediaPlayer.start();
-                mediaPlayer.pause();
-                mediaPlayer.seekTo(lastProgress);
                 Intent progressIntent=new Intent();
                 progressIntent.setAction(currentPositionActionName);
                 progressIntent.removeExtra(currentPositionKey);
                 progressIntent.putExtra(currentPositionKey,lastProgress);
                 sendBroadcast(progressIntent);
+                if(curretnMp3Info instanceof MusicDownLoadInfo){
+                    return;
+                }
+                mediaPlayer.start();
+                mediaPlayer.pause();
+                mediaPlayer.seekTo(lastProgress);
             }
             if(connCount<=0){
                 return;

@@ -80,7 +80,7 @@ public class XmlReadWriteUtil {
     public void writeMusicList(List<Mp3Info>mp3Infos,int set, int currentTime){
         String path= Environment.getExternalStorageDirectory().getAbsolutePath()+context.getResources().getString(R.string.list_file);
         File file=new File(path);
-        boolean netMusicFlag=false;
+        //boolean netMusicFlag=false;
         FileOutputStream outputStream=null;
         try {
             outputStream=new FileOutputStream(file);
@@ -92,10 +92,32 @@ public class XmlReadWriteUtil {
             for (int i = 0; i < mp3Infos.size(); i++) {
                 Mp3Info mp3Info = mp3Infos.get(i);
                 if(mp3Info instanceof MusicDownLoadInfo){
-                    netMusicFlag=true;
-                    continue;
+//                    netMusicFlag=true;
+//                    continue;
+                    MusicDownLoadInfo info=(MusicDownLoadInfo)mp3Info;
+                    serializer.startTag(null,"net_music");
+                    serializer.startTag(null,"id_list");
+                    serializer.text(String.valueOf(info.getId_list()));
+                    serializer.endTag(null,"id_list");
+                    serializer.startTag(null,"net_id");
+                    serializer.text(String.valueOf(info.getNetId()));
+                    serializer.endTag(null,"net_id");
+                    serializer.startTag(null,"net_url");
+                    serializer.text(String.valueOf(info.getNetUrl()));
+                    serializer.endTag(null,"net_url");
+                    serializer.startTag(null,"bps");
+                    serializer.text(String.valueOf(info.getBps()));
+                    serializer.endTag(null,"bps");
+                    serializer.startTag(null,"reckTime");
+                    serializer.text(String.valueOf(info.getReckTime()));
+                    serializer.endTag(null,"reckTime");
+                    serializer.startTag(null,"status");
+                    serializer.text(String.valueOf(info.getReckTime()));
+                    serializer.endTag(null,"status");
                 }
-                serializer.startTag(null,"music");
+                else {
+                    serializer.startTag(null, "music");
+                }
                 serializer.startTag(null,"id");
                 serializer.text(String.valueOf(mp3Info.getId()));
                 serializer.endTag(null,"id");
@@ -112,7 +134,11 @@ public class XmlReadWriteUtil {
                 serializer.text(String.valueOf(mp3Info.getSize()));
                 serializer.endTag(null,"size");
                 serializer.startTag(null,"url");
-                serializer.text(mp3Info.getUrl());
+                String str=mp3Info.getUrl();
+                if(str==null){
+                    str="";
+                }
+                serializer.text(str);
                 serializer.endTag(null,"url");
                 serializer.startTag(null,"album_id");
                 serializer.text(String.valueOf(mp3Info.getAlbum_id()));
@@ -123,14 +149,19 @@ public class XmlReadWriteUtil {
                 }
                 serializer.text(mp3Info.getAlbum_url());
                 serializer.endTag(null,"album_url");
-                serializer.endTag(null,"music");
+                if(mp3Info instanceof MusicDownLoadInfo){
+                    serializer.endTag(null,"net_music");
+                }
+                else {
+                    serializer.endTag(null, "music");
+                }
             }
             serializer.endTag(null,"musicList");
 
-            if(netMusicFlag){
-                set=0;
-                currentTime=0;
-            }
+//            if(netMusicFlag){
+//                set=0;
+//                currentTime=0;
+//            }
             serializer.startTag(null,"set");
             serializer.text(String.valueOf(set));
             serializer.endTag(null,"set");
@@ -197,10 +228,24 @@ public class XmlReadWriteUtil {
                             set=Integer.parseInt(parser.nextText());
                         } else if(tagName.equals("currentTime")){
                             currentTime=Integer.parseInt(parser.nextText());
+                        } else if(tagName.equals("net_music")){
+                            mp3Info=new MusicDownLoadInfo();
+                        } else if(tagName.equals("id_list")){
+                            ((MusicDownLoadInfo)mp3Info).setId_list(Integer.parseInt(parser.nextText()));
+                        } else if(tagName.equals("net_id")){
+                            ((MusicDownLoadInfo)mp3Info).setNetId(Integer.parseInt(parser.nextText()));
+                        } else if(tagName.equals("net_url")){
+                            ((MusicDownLoadInfo)mp3Info).setNetUrl(parser.nextText());
+                        } else if(tagName.equals("bps")){
+                            ((MusicDownLoadInfo)mp3Info).setBps(Integer.parseInt(parser.nextText()));
+                        } else if(tagName.equals("reckTime")){
+                            ((MusicDownLoadInfo)mp3Info).setReckTime(Integer.parseInt(parser.nextText()));
+                        } else if(tagName.equals("status")){
+                            ((MusicDownLoadInfo)mp3Info).setStatus(Integer.parseInt(parser.nextText()));
                         }
                         break;
                     case XmlPullParser.END_TAG:
-                        if(tagName.equals("music")){
+                        if(tagName.equals("music")||tagName.equals("net_music")){
                             mp3Infos.add(mp3Info);
                         }
                         break;
