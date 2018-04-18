@@ -222,9 +222,19 @@ public class MusicService extends Service {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
-                    mediaPlayer.start();
-                    mediaPlayer.pause();
-                    mediaPlayer.seekTo(lastProgress);
+                    if(isFirstOpen) {
+                        mediaPlayer.start();
+                        mediaPlayer.pause();
+                        mediaPlayer.seekTo(lastProgress);
+                        mediaPlayer.pause();
+                    }
+                    else{
+                        isPlaying=true;
+                        mediaPlayer.start();
+                        curretnMp3Info.setDuration(mediaPlayer.getDuration());
+                        sendMp3Info();
+                        sentCurrentTime();
+                    }
                 }
             });
         }
