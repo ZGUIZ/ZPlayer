@@ -134,7 +134,7 @@ public class DownloadUtil {
                     ((PlayingActivity)context).setFirstLrc(downInfo);
                 }
 
-                if(type.equals(MUSIC)) {
+                if(type.equals(MUSIC)&&downInfo instanceof MusicDownLoadInfo) {
                     File file=new File(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+downInfo.getArtist()+" - "+downInfo.getTitle()+".mp3");
                     Uri fileUri=Uri.fromFile(file);
                     Intent intent=new Intent();
@@ -157,7 +157,9 @@ public class DownloadUtil {
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
                 Log.e("DownLoad","error");
-                removeCancelable();
+                if(type.equals(MUSIC)) {
+                    removeCancelable();
+                }
             }
 
             @Override
@@ -199,7 +201,9 @@ public class DownloadUtil {
 
     //移除对应的Cancelable
     private void removeCancelable(){
-        cancelableHashMap.remove(((MusicDownLoadInfo)downInfo).getNetId());
+        if(type.equals(MUSIC)) {
+            cancelableHashMap.remove(((MusicDownLoadInfo) downInfo).getNetId());
+        }
     }
 
     //移除对应的Cancelable
