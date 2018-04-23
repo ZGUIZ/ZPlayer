@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,7 +41,6 @@ import com.example.amia.zplayer.util.WindowInfoMananger;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -221,29 +219,31 @@ public class PageFragment extends Fragment implements AdapterView.OnItemClickLis
 
         static_list.setDivider(null);
         static_list.setOnItemClickListener(this);
+
+        final AddListDialog.Builder builder=new AddListDialog.Builder(activity);
+        builder.setPositiveButton(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                String title=builder.getValue();
+                if(title!=null&&!title.equals("")) {
+                    add_toMusicList_List(title);
+                    MusicListDao musicListDao = new MusicListDao(activity);
+                    list_array = musicListDao.queryListNotDefault();
+                }
+                else{
+                    Toast.makeText(activity,"请确保输入列表名称不为空！",Toast.LENGTH_SHORT).show();
+                }
+                builder.cancleDialog();
+            }
+        });
+
         LinearLayout addlistButton=view.findViewById(R.id.add_list);
         addlistButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder=new AlertDialog.Builder(activity);
-                builder.setTitle("请输入列表的名称：");
-                final EditText editText=new EditText(activity);
-                builder.setView(editText);
-                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String title=editText.getText().toString().trim();
-                        if(title!=null&&!title.equals("")) {
-                            add_toMusicList_List(title);
-                            MusicListDao musicListDao = new MusicListDao(activity);
-                            list_array = musicListDao.queryListNotDefault();
-                        }
-                        else{
-                            Toast.makeText(activity,"请确保输入列表名称不为空！",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                builder.show();
+                AddListDialog dialog=builder.createDialog();
+                dialog.show();
             }
         });
         dynamic_lsit=view.findViewById(R.id.dynamic_list);
