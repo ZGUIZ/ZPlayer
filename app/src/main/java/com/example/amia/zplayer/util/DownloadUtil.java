@@ -21,6 +21,7 @@ import org.xutils.x;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +33,7 @@ import java.util.concurrent.Executors;
 public class DownloadUtil {
 
     public static ExecutorService pool= Executors.newFixedThreadPool(4);
+    private static HashMap<Integer,Callback.Cancelable> cancelableHashMap=new HashMap<>();
 
     public static final String PROGRESS_ACTION="com.example.amia.zplayer.util.downloadprogress";
 
@@ -122,16 +124,31 @@ public class DownloadUtil {
     }
 
     private void downLoad(RequestParams params){
-        x.http().post(params,new Callback.ProgressCallback<File>(){
+        final Callback.Cancelable cancelable=x.http().post(params,new Callback.ProgressCallback<File>(){
             LocalBroadcastManager manager=LocalBroadcastManager.getInstance(context);
             @Override
             public void onSuccess(File result) {
+                Log.i("DownLoad","Success");
+
+                if(type.equals(LRC)&&context instanceof PlayingActivity){
+                    ((PlayingActivity)context).setFirstLrc(downInfo);
+                }
+
                 if(type.equals(MUSIC)) {
-                    Intent intent = new Intent();
-                    intent.setAction(PROGRESS_ACTION);
-                    intent.putExtra("id", ((MusicDownLoadInfo) downInfo).getNetId());
-                    intent.putExtra("progress", 100L);
-                    intent.putExtra("duration", 100L);
+                    File file=new File(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+downInfo.getArtist()+" - "+downInfo.getTitle()+".mp3");
+                    Uri fileUri=Uri.fromFile(file);
+                    Intent intent=new Intent();
+                    intent.setAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    intent.setData(fileUri);
+                    context.sendBroadcast(intent);
+                    downloadDao.downloadFinish((MusicDownLoadInfo) downInfo);
+                    removeCancelable();
+
+                    Intent intent1 = new Intent();
+                    intent1.setAction(PROGRESS_ACTION);
+                    intent1.putExtra("id", ((MusicDownLoadInfo) downInfo).getNetId());
+                    intent1.putExtra("progress", 100L);
+                    intent1.putExtra("duration", 100L);
                     //发送本地广播
                     manager.sendBroadcast(intent);
                 }
@@ -140,6 +157,7 @@ public class DownloadUtil {
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
                 Log.e("DownLoad","error");
+                removeCancelable();
             }
 
             @Override
@@ -149,18 +167,7 @@ public class DownloadUtil {
 
             @Override
             public void onFinished() {
-                if(type.equals(LRC)&&context instanceof PlayingActivity){
-                    ((PlayingActivity)context).setFirstLrc(downInfo);
-                }
-                if(type.equals(MUSIC)){
-                    File file=new File(Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+downInfo.getArtist()+" - "+downInfo.getTitle()+".mp3");
-                    Uri fileUri=Uri.fromFile(file);
-                    Intent intent=new Intent();
-                    intent.setAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    intent.setData(fileUri);
-                    context.sendBroadcast(intent);
-                    downloadDao.downloadFinish((MusicDownLoadInfo) downInfo);
-                }
+                Log.i("DownLoad","finish");
             }
 
             @Override
@@ -185,5 +192,41 @@ public class DownloadUtil {
                 manager.sendBroadcast(intent);
             }
         });
+        if(downInfo instanceof MusicDownLoadInfo){
+            cancelableHashMap.put(((MusicDownLoadInfo)downInfo).getNetId(),cancelable);
+        }
+    }
+
+    //移除对应的Cancelable
+    private void removeCancelable(){
+        cancelableHashMap.remove(((MusicDownLoadInfo)downInfo).getNetId());
+    }
+
+    //移除对应的Cancelable
+    private static void removeCancelable(MusicDownLoadInfo info){
+        cancelableHashMap.remove(info.getNetId());
+    }
+
+    /**
+     * 取消下载
+     * @param info
+     */
+    public static void cancelDownload(MusicDownLoadInfo info){
+        if(info==null){
+            return;
+        }
+        Callback.Cancelable cancelable=cancelableHashMap.get(info.getNetId());
+        removeCancelable(info);
+        cancelable.cancel();
+    }
+
+    /**
+     * 判断是否正在下载
+     * @param info
+     * @return
+     */
+    public static boolean isLoading(MusicDownLoadInfo info){
+        Callback.Cancelable cancelable=cancelableHashMap.get(info.getNetId());
+        return cancelable!=null;
     }
 }
