@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -19,6 +20,7 @@ import com.example.amia.zplayer.R;
 
 public class ProgressView extends View {
 
+    private boolean isLoading; //是否正在下载
     private int duration;  //总长度
     private int progress;  //进度
     private int mWidth;
@@ -37,6 +39,7 @@ public class ProgressView extends View {
     }
 
     private void init(AttributeSet attrs){
+        isLoading=true;
         mWidth=50;
         mHeight=50;
         if(attrs==null){
@@ -95,6 +98,20 @@ public class ProgressView extends View {
         paint.setStrokeWidth(10f);
         canvas.drawCircle(center,center,innerCircle,paint);
 
+        paint.setColor(Color.rgb(191,191,191));
+        if(isLoading){
+            canvas.drawRect(center-8f,center-8f,center-2f,center+8f,paint);
+            canvas.drawRect(center+2f,center-8f,center+8f,center+8f,paint);
+        }
+        else{
+            Path path=new Path();
+            path.moveTo(center-6,center-8);
+            path.lineTo(center-6,center+8);
+            path.lineTo(center+8,center);
+            path.close();
+            canvas.drawPath(path,paint);
+        }
+
     }
 
     public int getDuration() {
@@ -115,5 +132,14 @@ public class ProgressView extends View {
         }
         this.progress = (int)progress;
         postInvalidate();
+    }
+
+    public void setLoading(boolean isLoading){
+        this.isLoading=isLoading;
+        postInvalidate();
+    }
+
+    public boolean isLoading(){
+        return isLoading;
     }
 }

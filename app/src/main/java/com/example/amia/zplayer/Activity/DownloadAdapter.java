@@ -24,7 +24,7 @@ public abstract class DownloadAdapter extends BaseAdapter {
 
     private List<MusicDownLoadInfo> list;
     private Context context;
-    private DownloadUtil downloadUtil;
+    private static DownloadUtil downloadUtil;
     private List<Holder> holderList=new ArrayList<>();
 
     public DownloadAdapter(Context context,List<MusicDownLoadInfo> list){
@@ -54,12 +54,14 @@ public abstract class DownloadAdapter extends BaseAdapter {
         if(view==null){
             view=View.inflate(context, R.layout.download_item_layout,null);
             holder=new Holder();
+            holder.context=context;
+            holder.adapter=this;
             holder.title=view.findViewById(R.id.down_titile);
             holder.artist=view.findViewById(R.id.down_artist);
             holder.progressView=view.findViewById(R.id.down_progress_view);
+            holder.progressView.setOnClickListener(holder);
             holder.downloadButton=view.findViewById(R.id.download_button);
-            holder.listener=new DownLoadClickListener();
-            holder.downloadButton.setOnClickListener(holder.listener);
+            holder.downloadButton.setOnClickListener(holder);
             view.setTag(holder);
             holderList.add(holder);
         }
@@ -67,53 +69,76 @@ public abstract class DownloadAdapter extends BaseAdapter {
             holder=(Holder)view.getTag();
         }
         MusicDownLoadInfo musicDownLoadInfo=list.get(i);
+        holder.info=musicDownLoadInfo;
         switch (musicDownLoadInfo.getStatus()){
             case 0:
             case 1:
                 holder.downloadButton.setClickable(true);
+                setProgressViewState(holder);
                 break;
             case 2:
                 holder.downloadButton.setClickable(false);
         }
-        holder.listener.setI(i);
-        holder.info=musicDownLoadInfo;
+
         holder.title.setText(musicDownLoadInfo.getTitle());
         holder.artist.setText(musicDownLoadInfo.getArtist());
         setDownProgressInfo(holder);
         return view;
     }
 
+    private void setProgressViewState(Holder holder){
+        MusicDownLoadInfo info=holder.info;
+        if(info==null||info.getStatus()==2){
+            return;
+        }
+        boolean isLoading=DownloadUtil.isLoading(info);
+        holder.progressView.setLoading(isLoading);
+    }
+
     public List<Holder> getHolderList(){
         return holderList;
     }
 
-    static class Holder{
+    static class Holder implements View.OnClickListener{
         TextView title;
         TextView artist;
         ProgressView progressView;
         ImageButton downloadButton;
         MusicDownLoadInfo info;
-        DownLoadClickListener listener;
         long progress;
         long duration;
-    }
-
-    protected abstract void setDownProgressInfo(Holder holder);
-
-    class DownLoadClickListener implements View.OnClickListener{
-
-        private int i;
-
-        public void setI(int i){
-            this.i=i;
-        }
+        private Context context;
+        private DownloadAdapter adapter;
 
         @Override
         public void onClick(View view) {
-            Log.i("clickListener","onClick");
-            MusicDownLoadInfo info=list.get(i);
-            info.setStatus(1);
-            downloadUtil.downLoadMusic(info);
+            switch (view.getId()){
+                case R.id.down_progress_view:
+                    downloadOrPause();
+                    break;
+                case R.id.download_button:
+                    info.setStatus(1);
+                    downloadUtil.downLoadMusic(info);
+                    break;
+            }
+        }
+
+        private void downloadOrPause(){
+            //Log.i("Download","downloadOrPause\t"+progressView.isLoading());
+            if(progressView.isLoading()){
+                DownloadUtil.cancelDownload(info);
+                info.setStatus(0);
+                progressView.setLoading(false);
+            }
+            else{
+                info.setStatus(1);
+                DownloadUtil downloadUtil=new DownloadUtil(context);
+                downloadUtil.downLoadMusic(info);
+                progressView.setLoading(true);
+            }
+            adapter.notifyDataSetChanged();
         }
     }
+
+    protected abstract void setDownProgressInfo(Holder holder);
 }

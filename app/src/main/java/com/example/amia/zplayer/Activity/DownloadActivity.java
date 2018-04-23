@@ -87,8 +87,8 @@ public class DownloadActivity extends MusicListActivity {
         protected void setDownProgressInfo(Holder holder) {
             switch (holder.info.getStatus()){
                 case 0:
-                    holder.downloadButton.setVisibility(View.VISIBLE);
-                    holder.progressView.setVisibility(View.GONE);
+                    holder.downloadButton.setVisibility(View.INVISIBLE);
+                    holder.progressView.setVisibility(View.VISIBLE);
                     holder.downloadButton.setImageDrawable(getResources().getDrawable(R.drawable.download_button,null));
                     holder.downloadButton.setClickable(true);
                     break;
@@ -99,7 +99,6 @@ public class DownloadActivity extends MusicListActivity {
                     holder.progressView.setProgress(holder.progress);
                     break;
                 case 2:
-                    //Log.i("NetMusic","status=2");
                     holder.downloadButton.setVisibility(View.VISIBLE);
                     holder.progressView.setVisibility(View.GONE);
                     holder.downloadButton.setImageDrawable(getResources().getDrawable(R.drawable.finish,null));
