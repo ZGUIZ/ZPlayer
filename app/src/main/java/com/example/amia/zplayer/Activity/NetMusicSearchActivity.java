@@ -254,6 +254,7 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
                 holder.progressView=view.findViewById(R.id.down_progress);
                 holder.listen.setOnClickListener(holder);
                 holder.download.setOnClickListener(holder);
+                holder.progressView.setOnClickListener(holder);
                 view.setTag(holder);
                 holderList.add(holder);
             }
@@ -267,16 +268,24 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
             holder.info= (MusicDownLoadInfo) resInfo.get(i);
             switch (holder.info.getStatus()){
                 case 0:
-                    holder.download.setVisibility(View.VISIBLE);
-                    holder.progressView.setVisibility(View.GONE);
-                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button,null));
-                    holder.download.setClickable(true);
+                    if(DownloadUtil.isPausing(NetMusicSearchActivity.this,holder.info,downloadDao)){
+                        holder.download.setVisibility(View.INVISIBLE);
+                        holder.progressView.setVisibility(View.VISIBLE);
+                        holder.progressView.setLoading(false);
+                    }
+                    else {
+                        holder.download.setVisibility(View.VISIBLE);
+                        holder.progressView.setVisibility(View.GONE);
+                        holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button, null));
+                        holder.download.setClickable(true);
+                    }
                     break;
                 case 1:
                     holder.download.setVisibility(View.INVISIBLE);
                     holder.progressView.setVisibility(View.VISIBLE);
                     holder.progressView.setDuration(holder.duration);
                     holder.progressView.setProgress(holder.progress);
+                    holder.progressView.setLoading(true);
                     break;
                 case 2:
                     //Log.i("NetMusic","status=2");
@@ -286,7 +295,6 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
                     holder.download.setClickable(false);
                     break;
             }
-
             return view;
         }
     }
@@ -311,7 +319,25 @@ public class NetMusicSearchActivity extends MusicAboutActivity implements View.O
                 case R.id.download_ib:
                     download(this);
                     break;
+                case R.id.down_progress:
+                    downloadOrPause();
+                    break;
             }
+        }
+
+        private void downloadOrPause(){
+            if(progressView.isLoading()){
+                DownloadUtil.cancelDownload(info);
+                info.setStatus(0);
+                progressView.setLoading(false);
+            }
+            else{
+                info.setStatus(1);
+                DownloadUtil downloadUtil=new DownloadUtil(NetMusicSearchActivity.this);
+                downloadUtil.downLoadMusic(info);
+                progressView.setLoading(true);
+            }
+            adapter.notifyDataSetChanged();
         }
     }
 

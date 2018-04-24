@@ -538,14 +538,22 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             holder.info= info;
             switch (holder.info.getStatus()){
                 case 0:
-                    holder.download.setVisibility(View.VISIBLE);
-                    holder.progressView.setVisibility(View.GONE);
-                    holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button,null));
-                    holder.download.setClickable(true);
+                    if(DownloadUtil.isPausing(NetMusListActivity.this,holder.info,downloadDao)){
+                        holder.download.setVisibility(View.INVISIBLE);
+                        holder.progressView.setVisibility(View.VISIBLE);
+                        holder.progressView.setLoading(false);
+                    }
+                    else {
+                        holder.download.setVisibility(View.VISIBLE);
+                        holder.progressView.setVisibility(View.GONE);
+                        holder.download.setImageDrawable(getResources().getDrawable(R.drawable.download_button, null));
+                        holder.download.setClickable(true);
+                    }
                     break;
                 case 1:
                     holder.download.setVisibility(View.INVISIBLE);
                     holder.progressView.setVisibility(View.VISIBLE);
+                    holder.progressView.setLoading(true);
                     break;
                 case 2:
                     holder.download.setVisibility(View.VISIBLE);
@@ -580,6 +588,7 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
             download=itemView.findViewById(R.id.download_ib);
             download.setOnClickListener(this);
             progressView=itemView.findViewById(R.id.down_progress);
+            progressView.setOnClickListener(this);
         }
 
         @Override
@@ -591,7 +600,25 @@ public class NetMusListActivity extends MusicAboutActivity implements View.OnCli
                 case R.id.net_item_rl:
                     tryListen(this);
                     break;
+                case R.id.down_progress:
+                    downloadOrPause();
+                    break;
             }
+        }
+
+        private void downloadOrPause(){
+            if(progressView.isLoading()){
+                DownloadUtil.cancelDownload(info);
+                info.setStatus(0);
+                progressView.setLoading(false);
+            }
+            else{
+                info.setStatus(1);
+                DownloadUtil downloadUtil=new DownloadUtil(NetMusListActivity.this);
+                downloadUtil.downLoadMusic(info);
+                progressView.setLoading(true);
+            }
+            adapter.notifyDataSetChanged();
         }
     }
 

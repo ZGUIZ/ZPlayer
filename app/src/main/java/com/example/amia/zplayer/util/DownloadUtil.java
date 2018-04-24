@@ -229,4 +229,15 @@ public class DownloadUtil {
         Callback.Cancelable cancelable=cancelableHashMap.get(info.getNetId());
         return cancelable!=null;
     }
+
+    public static boolean isPausing(Context context,MusicDownLoadInfo info,DownloadDao dao){
+        String path=Environment.getExternalStorageDirectory().getPath()+"/ZPlayer/Music/"+info.getArtist()+" - "+info.getTitle()+".mp3.tmp";
+        File file=new File(path);
+        if(dao.isInList(info.getNetId())&&file.exists()){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
