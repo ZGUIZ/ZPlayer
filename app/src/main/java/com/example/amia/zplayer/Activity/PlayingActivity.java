@@ -742,26 +742,17 @@ public class PlayingActivity extends MusicAboutActivity implements View.OnClickL
 
     //设置定时信息
     private void setScheStopTime(){
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("您希望多少分钟后停止？");
-        final EditText editText=new EditText(this);
-        editText.setHint("输入停止时间（分钟）");
-        editText.setSelectAllOnFocus(true);
-        builder.setView(editText);
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        final ScheTimeDialog.Builder builder=new ScheTimeDialog.Builder(this);
+        builder.setPositiveButton(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    int time = Integer.parseInt(editText.getText().toString().trim());
-                    musicPlayManager.setStopTime(time);
-                    isSche=true;
-                }
-                catch (Exception e){
-                    Toast.makeText(PlayingActivity.this,"输入错误!",Toast.LENGTH_SHORT).show();
-                }
+            public void onClick(View view) {
+                musicPlayManager.setStopTime(builder.getValue());
+                isSche=true;
+                builder.cancleDialog();
             }
         });
-        builder.show();
+        final ScheTimeDialog dialog=builder.createDialog();
+        dialog.show();
     }
 
     //停止定时
